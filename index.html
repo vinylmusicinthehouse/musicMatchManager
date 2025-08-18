@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0134
+  musicMatchManager v2025.08.18.0140-debug
 </div>
 <script>
   (function(){ 
@@ -4882,6 +4882,123 @@ filter(q){
 
   if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind, { once:true }); }
   else { bind(); }
+})();
+</script>
+
+<!-- Injected: DEBUG overlay scrollbar (forced left, thick, always visible, with logs) -->
+<script>
+(function debugOverlayScrollbars(){
+  function host(){ return document.querySelector('overlap-explorer'); }
+  function root(){ var h = host(); return h && (h.shadowRoot || h); }
+  function log(){ try{ console.info.apply(console, ['[overlay-debug]'].concat([].slice.call(arguments))); }catch(_){} }
+
+  function ensureStyles(r){
+    if (!r || r.getElementById('overlay-scrollbar-debug-styles')) return;
+    var st = document.createElement('style');
+    st.id = 'overlay-scrollbar-debug-styles';
+    st.textContent = `
+      .osbD-track, .osbD-thumb{
+        position: absolute;
+        left: 2px; /* forced LEFT so it won't overlap native iOS bar on the right */
+        border-radius: 3px;
+        pointer-events: none;
+        z-index: 9999; /* ensure on top */
+      }
+      .osbD-track{ width: 10px; background: rgba(255,255,255,.45); opacity: 1; }
+      .osbD-thumb{ width: 8px; background: #f4f6fa; opacity: 1; }
+      .osbD-badge{
+        position: fixed; bottom: 8px; left: 8px;
+        font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        color: #0f172a; background: #e2e8f0; border-radius: 8px; padding: 4px 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.25);
+        z-index: 10000;
+      }
+    `;
+    r.appendChild(st);
+  }
+
+  function addBadge(v){
+    var bd = document.getElementById('overlayDebugBadge');
+    if (bd) return;
+    bd = document.createElement('div');
+    bd.id = 'overlayDebugBadge';
+    bd.className = 'osbD-badge';
+    bd.textContent = 'Overlay DEBUG active (' + v + ')';
+    document.body.appendChild(bd);
+  }
+
+  function addForList(r, el){
+    if (!el || el._osbD) return;
+    el._osbD = { };
+    var track = document.createElement('div');
+    var thumb = document.createElement('div');
+    track.className = 'osbD-track';
+    thumb.className = 'osbD-thumb';
+    r.appendChild(track);
+    r.appendChild(thumb);
+    el._osbD.track = track; el._osbD.thumb = thumb;
+
+    function layout(){
+      var rr = r.host ? r.host.getBoundingClientRect() : r.getBoundingClientRect();
+      var er = el.getBoundingClientRect();
+      var top = Math.max((er.top - rr.top) + 4, 0);
+      var height = Math.max(er.height - 8, 0);
+      track.style.top = top + 'px';
+      track.style.height = height + 'px';
+      update();
+    }
+
+    function update(){
+      var ch = el.clientHeight, sh = el.scrollHeight, st = el.scrollTop;
+      if (sh <= ch + 1){
+        track.style.display = 'none'; thumb.style.display = 'none';
+        return;
+      } else { track.style.display = 'block'; thumb.style.display = 'block'; }
+      var rr = r.host ? r.host.getBoundingClientRect() : r.getBoundingClientRect();
+      var er = el.getBoundingClientRect();
+      var viewH = Math.max(er.height - 8, 0);
+      var ratio = ch / sh;
+      var h = Math.max(28, Math.floor(viewH * ratio)); // min thumb size
+      var top = Math.floor((st / (sh - ch)) * (viewH - h));
+      thumb.style.top = (Math.max((er.top - rr.top) + 4, 0) + top) + 'px';
+      thumb.style.height = h + 'px';
+    }
+
+    function onScroll(){
+      update();
+    }
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', layout);
+    new ResizeObserver(function(){ layout(); }).observe(el);
+
+    layout();
+    log('overlay attached', { id: el.id, ch: el.clientHeight, sh: el.scrollHeight });
+  }
+
+  function apply(){
+    var r = root(); if (!r){ setTimeout(apply, 120); return; }
+    ensureStyles(r);
+    var ids = ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'];
+    var found = 0;
+    ids.forEach(function(id){
+      var el = r.getElementById(id);
+      if (el){ addForList(r, el); found++; }
+    });
+    log('lists scanned', { found, ids });
+  }
+
+  function bind(){
+    var r = root(); if (!r){ setTimeout(bind, 120); return; }
+    apply();
+    var grid = r.getElementById('grid') || r;
+    var mo = new MutationObserver(function(){ apply(); });
+    mo.observe(grid, { childList: true, subtree: true });
+  }
+
+  // Run
+  bind();
+  addBadge((document.documentElement.getAttribute('data-build-version')||'n/a'));
 })();
 </script>
 </body></html>
