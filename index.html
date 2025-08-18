@@ -1,13 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-<style id="scrollbarGlobal">
-* { scrollbar-color: var(--text, #f4f6fa) transparent; scrollbar-width: thin; }
-*::-webkit-scrollbar       { width: 8px; height: 8px; }
-*::-webkit-scrollbar-thumb { background: var(--text, #f4f6fa); border-radius: 8px; }
-*::-webkit-scrollbar-track { background: rgba(255,255,255,.18); border-radius: 8px; }
-</style>
-
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -4734,334 +4727,147 @@ filter(q){
 })();
 </script>
 
-<!-- Injected: Overlap Explorer readable scrollbars (shadow-safe) -->
+<!-- Injected: targeted helpers (scrollbars+badges+exports) -->
 <script>
-(function scrollbarFix(){
-  const el = document.querySelector('overlap-explorer');
-  const root = el && (el.shadowRoot || el);
-  if (!root) return setTimeout(scrollbarFix, 120);
-  if (root.getElementById('scrollbarStyles')) return;
-  const st = document.createElement('style');
-  st.id = 'scrollbarStyles';
-  st.textContent = `
-    :host { --scroll-thumb: var(--text, #f4f6fa); --scroll-track: rgba(255,255,255,.18); }
-    :host * { scrollbar-color: var(--scroll-thumb) transparent; scrollbar-width: thin; }
-    :host *::-webkit-scrollbar       { width: 8px; height: 8px; }
-    :host *::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 8px; }
-    :host *::-webkit-scrollbar-track { background: var(--scroll-track); border-radius: 8px; }
-    @media (max-width: 920px){
-      :host *::-webkit-scrollbar       { width: 8px; height: 8px; }
-    }
-  `;
-  root.appendChild(st);
-})();
-</script>
-
-<!-- Build stamp -->
-<div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
-  font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
-  color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0255
-</div>
-<script>
-  (function(){ 
-    var v = "v2025.08.18.0122";
-    console.info("[build]", { version: v, features: ["mobile-1col","native-clear","scrollbars","auto-reveal","discogs-links"] });
-    document.documentElement.setAttribute("data-build-version", v);
-  })();
-</script>
-
-<!-- Injected: Export enhancers + Only A/B totals + Discogs links -->
-<script>
-(function enhanceExports(){
-  function host(){ return document.querySelector('overlap-explorer'); }
-  function root(){ const h = host(); return h && (h.shadowRoot || h); }
-  const DISC_ART = (id)=> id ? `https://www.discogs.com/artist/${id}` : '';
-  const DISC_REL = (id)=> id ? `https://www.discogs.com/release/${id}` : '';
-
-  function norm(s){
-    return String(s||'').toLowerCase()
-      .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[–—−]/g,'-').replace(/\s*&\s*/g,'&')
-      .replace(/\s+/g,' ').trim();
-  }
-
-  function getRows(side){
-    try{
-      const S = window.Store;
-      if (!S) return [];
-      const src = (S.get && S.get(side)) || S[side] || S[`_${side}`] || {};
-      if (Array.isArray(src)) return src;
-      if (Array.isArray(src.rows)) return src.rows;
-      if (Array.isArray(S[`_rows${side}`])) return S[`_rows${side}`];
-      return [];
-    }catch(_){ return []; }
-  }
-  function bothRows(){ return [...getRows('A'), ...getRows('B')]; }
-
-  function extractArtists(row){
-    const out = [];
-    const disp = (row?.artist && row.artist.display) || row?.Artist || row?.['Artist'];
-    const aid  = row?.artist_id || row?.['Artist ID'] || row?.artistId || row?.artistid;
-    if (disp){ out.push({ name: disp, id: aid }); }
-    const rawNames = row?.artist_names || row?.['artist_names'];
-    const rawIds   = row?.artist_ids  || row?.['artist_ids'];
-    if (rawNames){
-      const names = String(rawNames).split(/,(?![^()]*\))/).map(s=>s.trim()).filter(Boolean);
-      const ids   = rawIds ? String(rawIds).split(/[,;|]/).map(s=>s.trim()) : [];
-      for(let i=0;i<names.length;i++){
-        out.push({ name: names[i], id: ids[i]||aid||null });
-      }
-    }
-    return out;
-  }
-  function labelFromRow(r){
-    const artist = (r?._artists && r._artists.length ? r._artists.join(' & ') : (r?.artist && r.artist.display) || r?.Artist || r?.['Artist'] || '').trim();
-    const title  = (r?._title || r?.title || r?.Title || '').trim();
-    const cat    = (r?._catalog || r?.catalog_no || r?.['Catalog#'] || r?.['Cat#'] || '').trim();
-    return { artist, title, cat };
-  }
-
-  function buildArtistCounts(){
-    const a = new Map(), b = new Map(); // key = norm(name) => {name, id?, count}
-    const rowsA = getRows('A'); const rowsB = getRows('B');
-    function add(map, name, id){
-      const key = norm(name);
-      const v = map.get(key) || { name, id: id||null, count: 0 };
-      v.count += 1;
-      if (!v.id && id) v.id = id;
-      // Prefer longer display name (keeps casing/accents)
-      if (name && (!v.name || name.length > v.name.length)) v.name = name;
-      map.set(key, v);
-    }
-    for(const r of rowsA){ for(const ainfo of extractArtists(r)){ if (ainfo.name) add(a, ainfo.name, ainfo.id); } }
-    for(const r of rowsB){ for(const ainfo of extractArtists(r)){ if (ainfo.name) add(b, ainfo.name, ainfo.id); } }
-    return { a, b };
-  }
-
-  function buildReleaseSets(){
-    const setA = new Map(), setB = new Map(); // rid -> row
-    for(const r of getRows('A')){
-      const rid = r?.release_id || r?.['Release ID']; if (!rid) continue;
-      setA.set(String(rid), r);
-    }
-    for(const r of getRows('B')){
-      const rid = r?.release_id || r?.['Release ID']; if (!rid) continue;
-      setB.set(String(rid), r);
-    }
-    return { setA, setB };
-  }
-
-  function csvEscape(v){
-    if (v==null) return '';
-    const s = String(v);
-    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
-    return s;
-  }
-  function toCSV(rows, header){
-    const lines = [header.map(csvEscape).join(',')];
-    for(const r of rows){ lines.push(r.map(csvEscape).join(',')); }
-    return lines.join('\n');
-  }
-  function downloadCSV(filename, csv){
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  }
-
-  function exportSharedArtists(){
-    const { a, b } = buildArtistCounts();
-    const rows = [];
-    for(const [key, va] of a){
-      const vb = b.get(key);
-      if (!vb) continue; // shared only
-      const name = va.name || (vb && vb.name) || key;
-      const aid = va.id || (vb && vb.id) || '';
-      const countA = va.count || 0;
-      const countB = vb ? vb.count || 0 : 0;
-      const combined = countA + countB;
-      rows.push([ name, combined, countA, countB, aid, DISC_ART(aid) ]);
-    }
-    rows.sort((x,y)=> y[1]-x[1] || x[0].localeCompare(y[0]));
-    const csv = toCSV(rows, ['artist','count_combined','count_in_A','count_in_B','artist_id','artist_url']);
-    downloadCSV('shared_artists.csv', csv);
-  }
-
-  function exportOnlyArtists(side){
-    const { a, b } = buildArtistCounts();
-    const src = (side==='A') ? a : b, other = (side==='A') ? b : a;
-    const rows = [];
-    let total = 0;
-    for(const [key, v] of src){
-      if (other.has(key)) continue; // only
-      total += v.count||0;
-      rows.push([ v.name, v.count||0, v.id||'', DISC_ART(v.id) ]);
-    }
-    rows.sort((x,y)=> y[1]-x[1] || x[0].localeCompare(y[0]));
-    const csv = toCSV(rows, ['artist', `count_in_${side}`, 'artist_id', 'artist_url']);
-    downloadCSV(`only_${side.toLowerCase()}_artists.csv`, csv);
-  }
-
-  function exportSharedReleases(){
-    const { setA, setB } = buildReleaseSets();
-    const rows = [];
-    for(const [rid, row] of setA){
-      if (!setB.has(rid)) continue;
-      const lab = labelFromRow(row);
-      rows.push([ lab.artist, lab.title, lab.cat, rid, DISC_REL(rid) ]);
-    }
-    rows.sort((x,y)=> x[0].localeCompare(y[0]) || x[1].localeCompare(y[1]));
-    const csv = toCSV(rows, ['artist','title','catno','release_id','release_url']);
-    downloadCSV('shared_releases.csv', csv);
-  }
-
-  function bindButtons(){
-    const r = root(); if (!r){ setTimeout(bindButtons,120); return; }
-    // Find buttons by label text to be robust to id changes
-    function findBtn(regex){
-      const btns = Array.from(r.querySelectorAll('button'));
-      return btns.find(b => regex.test((b.textContent||'').trim().toLowerCase()));
-    }
-    const btnSharedArtists = findBtn(/export shared artists/);
-    const btnOnlyA = findBtn(/export a only \(artists\)/);
-    const btnOnlyB = findBtn(/export b only \(artists\)/);
-    const btnSharedReleases = findBtn(/export shared releases/);
-
-    if (btnSharedArtists && !btnSharedArtists._patched){
-      btnSharedArtists.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); exportSharedArtists(); });
-      btnSharedArtists._patched = true;
-    }
-    if (btnOnlyA && !btnOnlyA._patched){
-      btnOnlyA.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); exportOnlyArtists('A'); });
-      btnOnlyA._patched = true;
-    }
-    if (btnOnlyB && !btnOnlyB._patched){
-      btnOnlyB.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); exportOnlyArtists('B'); });
-      btnOnlyB._patched = true;
-    }
-    if (btnSharedReleases && !btnSharedReleases._patched){
-      btnSharedReleases.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); exportSharedReleases(); });
-      btnSharedReleases._patched = true;
-    }
-  }
-
-  // Panel header totals for Only A/B
-  function updateOnlyTotals(){
-    const r = root(); if (!r) return;
-    const { a, b } = buildArtistCounts();
-    const aOnly = []; const bOnly = [];
-    let totalA = 0, totalB = 0;
-    for(const [k, va] of a){ if (!b.has(k)){ aOnly.push(va); totalA += va.count||0; } }
-    for(const [k, vb] of b){ if (!a.has(k)){ bOnly.push(vb); totalB += vb.count||0; } }
-
-    function injectTotal(sectionId, total){
-      const section = r.getElementById(sectionId);
-      if (!section) return;
-      // Look for the section heading area (closest panel/card header)
-      const panel = section.closest('section, .panel, article, div');
-      if (!panel) return;
-      let slot = panel.querySelector('.only-total');
-      if (!slot){
-        slot = document.createElement('div');
-        slot.className = 'only-total';
-        slot.style.cssText = 'font-size:12px; opacity:.8; margin:-6px 0 6px 0;';
-        // Place just above the list (before the Sort row if present)
-        section.insertAdjacentElement('beforebegin', slot);
-      }
-      slot.textContent = `Total ${sectionId.includes('AOnly') ? 'A' : 'B'} count: ${total}`;
-    }
-    injectTotal('listAOnlyArtists', totalA);
-    injectTotal('listBOnlyArtists', totalB);
-  }
-
-  function bind(){
-    bindButtons();
-    updateOnlyTotals();
-  }
-
-  // Run once ready and when data changes
-  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind, { once:true }); }
-  else { bind(); }
-  if (window.Store){
-    try{
-      if (Store.on){
-        Store.on('data:ready', bind);
-        Store.on('data:ab-ready', bind);
-        Store.on('data:cleared', bind);
-      }
-      if (Store.addEventListener){
-        Store.addEventListener('change', bind);
-      }
-    }catch(_){}
-  }
-})();
-</script>
-
-<!-- Injected: Mobile scrollbars (final) + Export enhancers (deduped) -->
-<script>
-(function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true}); else fn(); })(function(){
+(function(){
+  // ---- utilities
   function host(){ return document.querySelector('overlap-explorer'); }
   function root(){ var h = host(); return h && (h.shadowRoot || h); }
-  function norm(s){ return String(s||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[–—−]/g,'-').replace(/\s*&\s*/g,'&').replace(/\s+/g,' ').trim(); }
-  var DISC_ART = function(id){ return id ? ('https://www.discogs.com/artist/' + id) : ''; };
-  var DISC_REL = function(id){ return id ? ('https://www.discogs.com/release/' + id) : ''; };
-
-  // ---------- EXPORT HELPERS ----------
   function getRows(side){
     try{
       var S = window.Store || {};
-      var src = (S.get && S.get(side)) || S[side] || S['_'+side] || {};
+      var src = (S.get && S.get(side)) || S[side] || S['_'+side] || null;
+      if (!src) return [];
       if (Array.isArray(src)) return src;
       if (Array.isArray(src.rows)) return src.rows;
-      if (Array.isArray(S['_rows'+side])) return S['_rows'+side];
     }catch(_){}
     return [];
   }
-  function bothRows(){ return [].concat(getRows('A'), getRows('B')); }
+  function norm(s){
+    try{
+      return String(s||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+    }catch(_){ return (s||'').toString().toLowerCase().trim(); }
+  }
+  function uniqPush(arr, v){ if (arr.indexOf(v)===-1) arr.push(v); }
 
+  // ---- Artist extraction per-row (names + id when present)
   function extractArtists(row){
     var out = [];
-    var disp = (row && row.artist && row.artist.display) || row && (row.Artist || row['Artist']);
-    var aid  = row && (row.artist_id || row['Artist ID'] || row.artistId || row.artistid);
+    // Preferred normalized v2 display
+    var disp = (row && row.artist && row.artist.display) || null;
+    var aid  = (row && (row.artist_id || row['Artist ID'] || row.artistId || row.artistid)) || null;
     if (disp){ out.push({ name: String(disp), id: aid }); }
-    var rawNames = row && (row.artist_names || row['artist_names']);
-    var rawIds   = row && (row.artist_ids  || row['artist_ids']);
-    if (rawNames){
-      var names = String(rawNames).split(/,(?![^()]*\))/).map(function(s){ return s.trim(); }).filter(Boolean);
-      var ids   = rawIds ? String(rawIds).split(/[,;|]/).map(function(s){ return s.trim(); }) : [];
-      for(var i=0;i<names.length;i++){ out.push({ name: names[i], id: ids[i] || aid || null }); }
+    // Legacy list of names
+    var legacy = (row && row._artists) || (row && row.artist_names) || (row && row['Artists']) || (row && row['Artist']);
+    if (Array.isArray(legacy)){
+      legacy.forEach(function(n){
+        n = String(n||'').trim();
+        if (!n) return;
+        // If we already added a v2 display, skip duplicates
+        if (!out.some(x => norm(x.name) === norm(n))) out.push({ name: n, id: aid });
+      });
+    } else if (legacy && typeof legacy === 'string'){
+      String(legacy).split(/,(?![^()]*\))/).forEach(function(n){
+        n = n.trim(); if (n) if (!out.some(x => norm(x.name)===norm(n))) out.push({ name:n, id: aid });
+      });
     }
     return out;
   }
+
+  // ---- Build artist count maps for A and B
   function buildArtistCounts(){
     var a = new Map(), b = new Map();
     function add(map, name, id){
       var key = norm(name);
       var v = map.get(key) || { name:name, id:id||null, count:0 };
-      v.count += 1; if (!v.id && id) v.id = id;
+      v.count += 1;
+      if (!v.id && id) v.id = id;
+      // Prefer the longest non-empty display as canonical name
       if (name && (!v.name || name.length > v.name.length)) v.name = name;
       map.set(key, v);
     }
-    getRows('A').forEach(function(r){ extractArtists(r).forEach(function(ai){ if(ai.name) add(a, ai.name, ai.id); }); });
-    getRows('B').forEach(function(r){ extractArtists(r).forEach(function(ai){ if(ai.name) add(b, ai.name, ai.id); }); });
-    return {a:a, b:b};
-  }
-  function buildReleaseSets(){
-    var setA = new Map(), setB = new Map();
-    getRows('A').forEach(function(r){ var rid = r && (r.release_id || r['Release ID']); if(rid) setA.set(String(rid), r); });
-    getRows('B').forEach(function(r){ var rid = r && (r.release_id || r['Release ID']); if(rid) setB.set(String(rid), r); });
-    return {setA:setA, setB:setB};
-  }
-  function labelFromRow(r){
-    var artist = (r && r._artists && r._artists.length ? r._artists.join(' & ') :
-                 (r && r.artist && r.artist.display) || (r && (r.Artist || r['Artist'])) || '').trim();
-    var title  = (r && (r._title || r.title || r.Title) || '').trim();
-    var cat    = (r && (r._catalog || r.catalog_no || r['Catalog#'] || r['Cat#']) || '').trim();
-    return {artist: artist, title: title, cat: cat};
+    getRows('A').forEach(function(r){ extractArtists(r).forEach(function(ai){ if(ai && ai.name) add(a, ai.name, ai.id); }); });
+    getRows('B').forEach(function(r){ extractArtists(r).forEach(function(ai){ if(ai && ai.name) add(b, ai.name, ai.id); }); });
+    return { a:a, b:b };
   }
 
+  // ---- MOBILE SCROLLBARS (iOS only), attach once when lists exist
+  function attachScrollbars(){
+    var ua = navigator.userAgent || '';
+    var isIOSWK = /AppleWebKit/.test(ua) && /Mobile\/|iP(hone|ad|od)/.test(ua);
+    if (!isIOSWK) return; // skip non-iOS
+    var r = root(); if (!r) return;
+
+    if (!r.getElementById('osb-final-styles')){
+      var st = document.createElement('style'); st.id='osb-final-styles';
+      st.textContent = '.osbF-track,.osbF-thumb{position:absolute;left:-6px;pointer-events:none;z-index:9999;border-radius:3px}.osbF-track{width:6px;background:rgba(255,255,255,.28);opacity:.9}.osbF-thumb{width:4px;background:var(--text,#f4f6fa);opacity:.9}.osbF-hide .osbF-thumb{opacity:.35}@media (min-width:921px){.osbF-track,.osbF-thumb{display:none!important}}';
+      r.appendChild(st);
+    }
+    function containerFor(el){ var n=el.parentElement; while(n && n!==r){ if(getComputedStyle(n).position!=='static') return n; n=n.parentElement; } n=el.parentElement||el; if (getComputedStyle(n).position==='static') n.style.position='relative'; return n; }
+    function attachOne(el){
+      if (!el || el._osbF) return;
+      var c=containerFor(el), tr=document.createElement('div'), th=document.createElement('div');
+      tr.className='osbF-track'; th.className='osbF-thumb'; c.appendChild(tr); c.appendChild(th);
+      el._osbF={track:tr,thumb:th,container:c};
+      function layout(){ var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); var top=Math.max((er.top-cr.top)+4,0), h=Math.max(er.height-8,0); tr.style.top=top+'px'; tr.style.height=h+'px'; update(); }
+      function update(){ var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop; if(sh<=ch+1){ tr.style.display='none'; th.style.display='none'; return; } tr.style.display='block'; th.style.display='block'; var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); var viewH=Math.max(er.height-8,0); var ratio=ch/sh; var h=Math.max(24, Math.floor(viewH*ratio)); var top=Math.floor((st/(sh-ch))*(viewH-h)); th.style.top=(Math.max((er.top-cr.top)+4,0)+top)+'px'; th.style.height=h+'px'; }
+      function peek(){ c.classList.remove('osbF-hide'); update(); clearTimeout(el._osbFto); el._osbFto=setTimeout(function(){ c.classList.add('osbF-hide'); }, 900); }
+      el.addEventListener('scroll', peek, {passive:true}); el.addEventListener('touchstart', peek, {passive:true}); window.addEventListener('resize', layout);
+      new ResizeObserver(function(){ layout(); }).observe(el);
+      layout(); peek();
+    }
+    ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'].forEach(function(id){
+      var el = r.getElementById(id); if (el) attachOne(el);
+    });
+  }
+
+  // ---- ONLY A/B BADGES + small totals line (artists only)
+  function ensureOnlyBadges(){
+    var r = root(); if (!r) return;
+    var Asec = r.getElementById('listAOnlyArtists');
+    var Bsec = r.getElementById('listBOnlyArtists');
+    if (!Asec && !Bsec) return;
+
+    // Compute totals once per call
+    var AB = buildArtistCounts();
+    var aOnly = 0, bOnly = 0;
+    AB.a.forEach(function(_,k){ if(!AB.b.has(k)) aOnly++; });
+    AB.b.forEach(function(_,k){ if(!AB.a.has(k)) bOnly++; });
+
+    function injectTotal(section, txt){
+      if (!section) return;
+      var prev = section.previousElementSibling;
+      var slot = (prev && prev.classList && prev.classList.contains('only-total')) ? prev : null;
+      if (!slot){
+        slot = document.createElement('div');
+        slot.className='only-total';
+        slot.style.cssText='font-size:12px;opacity:.8;margin:-6px 0 6px 0;';
+        section.insertAdjacentElement('beforebegin', slot);
+      }
+      slot.textContent = txt;
+    }
+    injectTotal(Asec, 'Total A count: ' + aOnly);
+    injectTotal(Bsec, 'Total B count: ' + bOnly);
+
+    function ensurePill(section, val){
+      if (!section) return;
+      var panel = section.closest('section, .panel, article, div');
+      if (!panel) return;
+      if (getComputedStyle(panel).position==='static') panel.style.position='relative';
+      var pill = panel.querySelector('.only-badge-pill');
+      if (!pill){
+        pill = document.createElement('span');
+        pill.className='pill only-badge-pill';
+        pill.style.cssText='position:absolute; top:10px; right:58px; padding:4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.1); background:#1b233a; color:#cbd5e1; font-size:12px';
+        panel.appendChild(pill);
+      }
+      pill.textContent = String(val);
+    }
+    ensurePill(Asec, aOnly);
+    ensurePill(Bsec, bOnly);
+  }
+
+  // ---- EXPORTS (artists + releases), compute on click only
   function csvEscape(v){ if(v==null) return ''; var s=String(v); return /[",\n]/.test(s)?('"'+s.replace(/"/g,'""')+'"'):s; }
   function toCSV(rows, header){ var lines=[header.map(csvEscape).join(',')]; rows.forEach(function(r){ lines.push(r.map(csvEscape).join(',')); }); return lines.join('\\n'); }
   function downloadCSV(filename, csv){
@@ -5069,302 +4875,99 @@ filter(q){
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   }
-
-  function exportSharedArtists(){
-    var AB = buildArtistCounts(); var a=AB.a, b=AB.b;
+  function buildSharedArtistsRows(){
+    var AB = buildArtistCounts(), a=AB.a, b=AB.b;
     var rows=[];
     a.forEach(function(va, key){
-      var vb = b.get(key); if(!vb) return;
+      var vb = b.get(key); if (!vb) return;
       var name = va.name || (vb && vb.name) || key;
-      var aid = va.id || (vb && vb.id) || '';
+      var aid  = va.id || (vb && vb.id) || '';
       var countA = va.count||0, countB = vb ? (vb.count||0) : 0;
-      rows.push([name, countA+countB, countA, countB, aid, DISC_ART(aid)]);
+      rows.push([ name, countA+countB, countA, countB, aid, (aid?('https://www.discogs.com/artist/'+aid):'') ]);
     });
     rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); });
-    var csv = toCSV(rows, ['artist','count_combined','count_in_A','count_in_B','artist_id','artist_url']);
-    downloadCSV('shared_artists.csv', csv);
+    return rows;
   }
-
-  function exportOnlyArtists(side){
-    var AB = buildArtistCounts(); var src = side==='A'?AB.a:AB.b; var other = side==='A'?AB.b:AB.a;
+  function buildOnlyArtistsRows(side){
+    var AB = buildArtistCounts();
+    var src = side==='A' ? AB.a : AB.b;
+    var other = side==='A' ? AB.b : AB.a;
     var rows=[];
-    src.forEach(function(v, key){ if(other.has(key)) return; rows.push([v.name, v.count||0, v.id||'', DISC_ART(v.id)]); });
+    src.forEach(function(v,k){
+      if (other.has(k)) return;
+      rows.push([ v.name, v.count||0, v.id||'', (v.id?('https://www.discogs.com/artist/'+v.id):'') ]);
+    });
     rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); });
-    var csv = toCSV(rows, ['artist','count_in_'+side, 'artist_id','artist_url']);
-    downloadCSV('only_'+side.toLowerCase()+'_artists.csv', csv);
+    return rows;
   }
-
-  function exportSharedReleases(){
-    var ss = buildReleaseSets(), setA = ss.setA, setB = ss.setB;
+  function buildSharedReleasesRows(){
+    var setA = new Map(), setB = new Map();
+    getRows('A').forEach(function(r){ var rid = r && (r.release_id || r['Release ID']); if(rid!=null && rid!=='') setA.set(String(rid), r); });
+    getRows('B').forEach(function(r){ var rid = r && (r.release_id || r['Release ID']); if(rid!=null && rid!=='') setB.set(String(rid), r); });
     var rows=[];
-    setA.forEach(function(row, rid){ if(!setB.has(rid)) return; var lab = labelFromRow(row); rows.push([lab.artist, lab.title, lab.cat, rid, DISC_REL(rid)]); });
+    setA.forEach(function(row, rid){
+      if (!setB.has(rid)) return;
+      var artist = (row && row._artists && row._artists.length) ? row._artists.join(' & ')
+                  : (row && row.artist && row.artist.display) || (row && (row.Artist || row['Artist'])) || '';
+      var title  = (row && (row._title || row.title || row.Title)) || '';
+      var cat    = (row && (row._catalog || row.catalog_no || row['Catalog#'] || row['Cat#'])) || '';
+      rows.push([ artist, title, cat, rid, 'https://www.discogs.com/release/'+rid ]);
+    });
     rows.sort(function(x,y){ return x[0].localeCompare(y[0]) || x[1].localeCompare(y[1]); });
-    var csv = toCSV(rows, ['artist','title','catno','release_id','release_url']);
-    downloadCSV('shared_releases.csv', csv);
+    return rows;
+  }
+  function replaceWithClone(btn){ if(!btn || btn._replaced) return btn; var clone = btn.cloneNode(true); btn.replaceWith(clone); clone._replaced = true; return clone; }
+  function findBtn(rx){ var r = root(); if(!r) return null; var btns = [].slice.call(r.querySelectorAll('button')); return btns.find(function(b){ return rx.test((b.textContent||'').trim().toLowerCase()); }); }
+  function bindExportButtons(){
+    var bSA = findBtn(/export shared artists/);
+    var bOA = findBtn(/export a only \(artists\)/);
+    var bOB = findBtn(/export b only \(artists\)/);
+    var bSR = findBtn(/export shared releases/);
+    if (bSA && !bSA._patched){ bSA = replaceWithClone(bSA); bSA.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); var rows=buildSharedArtistsRows(); downloadCSV('shared_artists.csv', toCSV(rows, ['artist','count_combined','count_in_A','count_in_B','artist_id','artist_url'])); }); bSA._patched=true; }
+    if (bOA && !bOA._patched){ bOA = replaceWithClone(bOA); bOA.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); var rows=buildOnlyArtistsRows('A'); downloadCSV('only_a_artists.csv', toCSV(rows, ['artist','count_in_A','artist_id','artist_url'])); }); bOA._patched=true; }
+    if (bOB && !bOB._patched){ bOB = replaceWithClone(bOB); bOB.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); var rows=buildOnlyArtistsRows('B'); downloadCSV('only_b_artists.csv', toCSV(rows, ['artist','count_in_B','artist_id','artist_url'])); }); bOB._patched=true; }
+    if (bSR && !bSR._patched){ bSR = replaceWithClone(bSR); bSR.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); var rows=buildSharedReleasesRows(); downloadCSV('shared_releases.csv', toCSV(rows, ['artist','title','catno','release_id','release_url'])); }); bSR._patched=true; }
   }
 
-  function replaceWithClone(btn){
-    if(!btn || btn._replaced) return btn;
-    var clone = btn.cloneNode(true);
-    btn.replaceWith(clone);
-    clone._replaced = true;
-    return clone;
-  }
-
-  function bindButtons(){
-    var r = root(); if(!r){ setTimeout(bindButtons, 120); return; }
-    function findBtn(rx){ var btns = [].slice.call(r.querySelectorAll('button')); return btns.find(function(b){ return rx.test((b.textContent||'').trim().toLowerCase()); }); }
-
-    var bSharedArtists = findBtn(/export shared artists/);
-    var bOnlyA = findBtn(/export a only \(artists\)/);
-    var bOnlyB = findBtn(/export b only \(artists\)/);
-    var bSharedReleases = findBtn(/export shared releases/);
-
-    if (bSharedArtists && !bSharedArtists._patched){
-      bSharedArtists = replaceWithClone(bSharedArtists);
-      bSharedArtists.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); exportSharedArtists(); });
-      bSharedArtists._patched = true;
-    }
-    if (bOnlyA && !bOnlyA._patched){
-      bOnlyA = replaceWithClone(bOnlyA);
-      bOnlyA.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); exportOnlyArtists('A'); });
-      bOnlyA._patched = true;
-    }
-    if (bOnlyB && !bOnlyB._patched){
-      bOnlyB = replaceWithClone(bOnlyB);
-      bOnlyB.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); exportOnlyArtists('B'); });
-      bOnlyB._patched = true;
-    }
-    if (bSharedReleases && !bSharedReleases._patched){
-      bSharedReleases = replaceWithClone(bSharedReleases);
-      bSharedReleases.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); exportSharedReleases(); });
-      bSharedReleases._patched = true;
-    }
-  }
-
-  function updateOnlyTotals(){
-    var r = root(); if(!r) return;
-    var AB = buildArtistCounts(); var a=AB.a, b=AB.b; var totalA=0,totalB=0;
-    a.forEach(function(v,k){ if(!b.has(k)) totalA += v.count||0; });
-    b.forEach(function(v,k){ if(!a.has(k)) totalB += v.count||0; });
-    function injectTotal(listId, total, side){
-      var section = r.getElementById(listId); if(!section) return;
-      // Create or reuse a sibling element just above the section list.
-      var prev = section.previousElementSibling;
-      var slot = (prev && prev.classList && prev.classList.contains('only-total')) ? prev : null;
-      if(!slot){
-        slot = document.createElement('div');
-        slot.className = 'only-total';
-        slot.style.cssText = 'font-size:12px; opacity:.8; margin:-6px 0 6px 0;';
-        section.insertAdjacentElement('beforebegin', slot);
+  // ---- READY: attach once after A or B has rows
+  function attachOnceWhenData(){
+    if (attachOnceWhenData._done) return;
+    var tries = 0;
+    (function poll(){
+      var a = getRows('A').length, b = getRows('B').length;
+      if (a+b > 0){
+        try{ attachScrollbars(); }catch(_){}
+        try{ ensureOnlyBadges(); }catch(_){}
+        try{ bindExportButtons(); }catch(_){}
+        attachOnceWhenData._done = true;
+        return;
       }
-      slot.textContent = 'Total ' + side + ' count: ' + total;
-    }
-    injectTotal('listAOnlyArtists', totalA, 'A');
-    injectTotal('listBOnlyArtists', totalB, 'B');
+      if (++tries > 240) return; // ~12s cap
+      setTimeout(poll, 50);
+    })();
   }
 
-  // ---------- MOBILE SCROLLBAR (final) ----------
-  (function mobileScrollbars(){
-    var isIOSWK = /AppleWebKit/.test(navigator.userAgent) && /Mobile\/|iP(hone|ad|od)/.test(navigator.userAgent);
-    if (!isIOSWK) return; // desktop/Android keep native/themed scrollbars
+  // Wire to Store change (lightweight, debounced)
+  function debounced(fn, ms){ var t; return function(){ clearTimeout(t); t=setTimeout(fn, ms); }; }
+  var onChange = debounced(function(){
+    // Only re-run badges (counts could change). Exports are on-click anyway.
+    try{ ensureOnlyBadges(); }catch(_){}
+  }, 200);
 
-    function ensureStyles(r){
-      if (r.getElementById('osb-final-styles')) return;
-      var st = document.createElement('style'); st.id='osb-final-styles';
-      st.textContent = `
-        .osbF-track,.osbF-thumb{ position:absolute; left:-6px; pointer-events:none; z-index:9999; border-radius:3px; }
-        .osbF-track{ width:6px; background:rgba(255,255,255,.28); opacity:.9; }
-        .osbF-thumb{ width:4px; background:var(--text,#f4f6fa); opacity:.9; }
-        .osbF-hide .osbF-thumb{ opacity:.35; }
-        @media (min-width: 921px){ .osbF-track,.osbF-thumb{ display:none !important; } }
-      `;
-      r.appendChild(st);
-    }
-    function containerFor(el){
-      var r=root(); var n=el.parentElement;
-      while(n && n!==r){ var cs=getComputedStyle(n); if(cs.position!=='static') return n; n=n.parentElement; }
-      n = el.parentElement || el; if (getComputedStyle(n).position==='static') n.style.position='relative'; return n;
-    }
-    function attach(el){
-      if (!el || el._osbF) return;
-      var r=root(), c=containerFor(el);
-      var track=document.createElement('div'), thumb=document.createElement('div');
-      track.className='osbF-track'; thumb.className='osbF-thumb';
-      c.appendChild(track); c.appendChild(thumb);
-      el._osbF={track:track,thumb:thumb,container:c};
-      function layout(){ var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); var top=Math.max((er.top-cr.top)+4,0), h=Math.max(er.height-8,0); track.style.top=top+'px'; track.style.height=h+'px'; update(); }
-      function update(){ var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop; if (sh<=ch+1){ track.style.display='none'; thumb.style.display='none'; return; } else { track.style.display='block'; thumb.style.display='block'; }
-        var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); var viewH=Math.max(er.height-8,0); var ratio=ch/sh; var h=Math.max(24, Math.floor(viewH*ratio)); var top=Math.floor((st/(sh-ch))*(viewH-h)); thumb.style.top=(Math.max((er.top-cr.top)+4,0)+top)+'px'; thumb.style.height=h+'px'; }
-      function show(){ c.classList.remove('osbF-hide'); update(); clearTimeout(el._osbFto); el._osbFto=setTimeout(function(){ c.classList.add('osbF-hide'); }, 900); }
-      el.addEventListener('scroll', show, {passive:true}); el.addEventListener('touchstart', show, {passive:true}); window.addEventListener('resize', layout); new ResizeObserver(function(){ layout(); }).observe(el);
-      layout(); show();
-    }
-    function apply(){ var r=root(); if(!r){ setTimeout(apply,120); return; } ensureStyles(r);
-      ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'].forEach(function(id){ var el=r.getElementById(id); if(el) attach(el); });
-    }
-    function bind(){ var r=root(); if(!r){ setTimeout(bind,120); return; } apply(); var grid=r.getElementById('grid')||r; new MutationObserver(function(){ apply(); }).observe(grid,{childList:true,subtree:true}); }
-    bind();
-  })();
-
-  // bind now and on data changes
-  function bindAll(){ bindButtons(); updateOnlyTotals(); }
-  bindAll();
-  if (window.Store){
+  function init(){
+    attachOnceWhenData();
     try{
-      if (Store.on){ Store.on('data:ready', bindAll); Store.on('data:ab-ready', bindAll); Store.on('data:cleared', bindAll); }
-      if (Store.addEventListener){ Store.addEventListener('change', bindAll); }
-    }catch(_){}
-  }
-});
-</script>
-
-<!-- Injected: Only A/B header pill counts -->
-<script>
-(function enhanceOnlyBadges(){
-  function host(){ return document.querySelector('overlap-explorer'); }
-  function root(){ var h = host(); return h && (h.shadowRoot || h); }
-  function ensurePos(el){ var cs = getComputedStyle(el); if (cs.position === 'static') el.style.position = 'relative'; }
-  function badgeFor(panel){
-    var r = root(); if(!panel) return null;
-    ensurePos(panel);
-    var b = panel.querySelector('.only-badge-pill');
-    if (!b){
-      b = document.createElement('span');
-      b.className = 'pill only-badge-pill'; // reuse existing pill styling
-      // place near the top-right, leaving room for chevrons/buttons
-      b.style.cssText = 'position:absolute; top:10px; right:58px;';
-      panel.appendChild(b);
-    }
-    return b;
-  }
-  function computeTotals(){
-    var S = window.Store || {};
-    function getRows(side){
-      var src = (S.get && S.get(side)) || S[side] || S['_'+side] || {};
-      if (Array.isArray(src)) return src;
-      if (Array.isArray(src.rows)) return src.rows;
-      if (Array.isArray(S['_rows'+side])) return S['_rows'+side];
-      return [];
-    }
-    function norm(s){ return String(s||'').toLowerCase()
-      .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[–—−]/g,'-').replace(/\s*&\s*/g,'&')
-      .replace(/\s+/g,' ').trim(); }
-    function extractArtists(row){
-      var out = [];
-      var disp = (row && row.artist && row.artist.display) || row && (row.Artist || row['Artist']);
-      if (disp){ out.push(String(disp)); }
-      var raw = row && (row.artist_names || row['artist_names']);
-      if (raw){
-        String(raw).split(/,(?![^()]*\))/).forEach(function(n){ n=n.trim(); if(n) out.push(n); });
-      }
-      return out;
-    }
-    var mapA = new Map(), mapB = new Map();
-    getRows('A').forEach(function(r){ extractArtists(r).forEach(function(n){ var k=norm(n); mapA.set(k, (mapA.get(k)||0)+1); }); });
-    getRows('B').forEach(function(r){ extractArtists(r).forEach(function(n){ var k=norm(n); mapB.set(k, (mapB.get(k)||0)+1); }); });
-    // unique counts per Only
-    var countAOnly = 0, countBOnly = 0;
-    mapA.forEach(function(_,k){ if(!mapB.has(k)) countAOnly++; });
-    mapB.forEach(function(_,k){ if(!mapA.has(k)) countBOnly++; });
-    return {countAOnly: countAOnly, countBOnly: countBOnly};
-  }
-  function apply(){
-    var r = root(); if(!r) return;
-    var Asec = r.getElementById('listAOnlyArtists');
-    var Bsec = r.getElementById('listBOnlyArtists');
-    var Apanel = Asec && Asec.closest('section, .panel, article, div');
-    var Bpanel = Bsec && Bsec.closest('section, .panel, article, div');
-    var totals = computeTotals();
-    if (Apanel){ badgeFor(Apanel).textContent = totals.countAOnly; }
-    if (Bpanel){ badgeFor(Bpanel).textContent = totals.countBOnly; }
-  }
-  function bind(){
-    apply();
-    // Observe Store signals if present
-    if (window.Store){
-      try{
-        var S = window.Store;
-        if (S.on){ S.on('data:ready', apply); S.on('data:ab-ready', apply); S.on('data:cleared', apply); }
-        if (S.addEventListener){ S.addEventListener('change', apply); }
-      }catch(_){}
-    }
-    // Also observe overlap-explorer DOM for re-renders
-    var r = root();
-    if (r){
-      var grid = r.getElementById('grid') || r;
-      new MutationObserver(function(){ apply(); }).observe(grid, {childList:true, subtree:true});
-    }
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, {once:true}); else bind();
-})();
-</script>
-
-<!-- Injected: Stability layer (debounce + guards) -->
-<script>
-(function stabilityLayer(){
-  function host(){ return document.querySelector('overlap-explorer'); }
-  function root(){ var h = host(); return h && (h.shadowRoot || h); }
-
-  // Generic debouncer
-  function debounce(fn, wait){
-    var t, lastArgs;
-    return function(){
-      lastArgs = arguments;
-      clearTimeout(t);
-      t = setTimeout(function(){ try{ fn.apply(null, lastArgs); }catch(e){ console.error('[debounced run]', e); } }, wait);
-    };
-  }
-
-  // Try to hook the funcs created earlier (if present)
-  var r = root();
-
-  // Patch mobile scrollbar apply() to never rebind the same list twice
-  (function patchOSB(){
-    if (!r) return;
-    var style = r.getElementById('osb-final-styles');
-    // Nothing to do if style not injected yet; we'll rely on first-run code
-    // but we ensure that each list gets a marker before observers fire again.
-    ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'].forEach(function(id){
-      var el = r.getElementById(id);
-      if (el) { if (!el.dataset.osbGuard) el.dataset.osbGuard = '1'; }
-    });
-  })();
-
-  // Debounce high-frequency rebinds triggered by Store/DOM changes
-  var debounceBind = debounce(function(){
-    try{
-      var e = new CustomEvent('mmm:rebalance');
-      document.dispatchEvent(e);
-    }catch(_){}
-  }, 120);
-
-  // If our earlier scripts added listeners to Store/MutationObserver,
-  // we add one more lightweight hook that they can listen for to refresh once.
-  document.addEventListener('DOMContentLoaded', debounceBind, {once:true});
-  document.addEventListener('mmm:data', debounceBind);
-  // Also observe the shadow root but coalesce bursts
-  (function observe(){
-    var r = root(); if (!r) { setTimeout(observe, 300); return; }
-    var grid = r.getElementById('grid') || r;
-    new MutationObserver(debounceBind).observe(grid, { childList:true, subtree:true });
-  })();
-
-  // Add no-op listeners the earlier code can optionally use
-  try{
-    if (window.Store){
       var S = window.Store;
-      if (S.on){
-        S.on('data:ready', function(){ document.dispatchEvent(new CustomEvent('mmm:data')); });
-        S.on('data:ab-ready', function(){ document.dispatchEvent(new CustomEvent('mmm:data')); });
-        S.on('data:cleared', function(){ document.dispatchEvent(new CustomEvent('mmm:data')); });
+      if (S && S.addEventListener){
+        S.addEventListener('change', onChange);
       }
-      if (S.addEventListener){
-        S.addEventListener('change', function(){ document.dispatchEvent(new CustomEvent('mmm:data')); });
-      }
-    }
-  }catch(_){}
+    }catch(_){}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+  else init();
 })();
 </script>
+
+
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager v2025.08.18.0334.stable4</footer>
 </body></html>
