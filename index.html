@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0240
+  musicMatchManager v2025.08.18.0245
 </div>
 <script>
   (function(){ 
@@ -4968,7 +4968,7 @@ filter(q){
         slot.className = 'only-total';
         slot.style.cssText = 'font-size:12px; opacity:.8; margin:-6px 0 6px 0;';
         // Place just above the list (before the Sort row if present)
-        panel.insertBefore(slot, section);
+        section.insertAdjacentElement('beforebegin', slot);
       }
       slot.textContent = `Total ${sectionId.includes('AOnly') ? 'A' : 'B'} count: ${total}`;
     }
