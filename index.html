@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0157-debug3
+  musicMatchManager v2025.08.18.0211
 </div>
 <script>
   (function(){ 
@@ -4771,245 +4771,230 @@ filter(q){
   })();
 </script>
 
-<!-- Injected: Absolute overlay scrollbar (iOS-friendly) -->
+<!-- Injected: Export enhancers + Only A/B totals + Discogs links -->
 <script>
-(function overlayScrollbars(){
-  // Detect iOS WebKit (Safari/Chrome on iPhone/iPad)
-  var isIOSWebKit = /AppleWebKit/.test(navigator.userAgent) && /Mobile\/|iP(hone|ad|od)/.test(navigator.userAgent);
-  if (!isIOSWebKit) return; // Desktop/Android keep native styling
-
+(function enhanceExports(){
   function host(){ return document.querySelector('overlap-explorer'); }
-  function root(){ var h = host(); return h && (h.shadowRoot || h); }
+  function root(){ const h = host(); return h && (h.shadowRoot || h); }
+  const DISC_ART = (id)=> id ? `https://www.discogs.com/artist/${id}` : '';
+  const DISC_REL = (id)=> id ? `https://www.discogs.com/release/${id}` : '';
 
-  function ensureStyles(){
-    var r = root(); if (!r) return;
-    if (r.getElementById('overlay-scrollbar-styles')) return;
-    var st = document.createElement('style');
-    st.id = 'overlay-scrollbar-styles';
-    st.textContent = `
-      .osb-thumb, .osb-track{
-        position: absolute;
-        right: 2px;
-        border-radius: 3px;
-        pointer-events: none;
-        z-index: 50;
+  function norm(s){
+    return String(s||'').toLowerCase()
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[–—−]/g,'-').replace(/\s*&\s*/g,'&')
+      .replace(/\s+/g,' ').trim();
+  }
+
+  function getRows(side){
+    try{
+      const S = window.Store;
+      if (!S) return [];
+      const src = (S.get && S.get(side)) || S[side] || S[`_${side}`] || {};
+      if (Array.isArray(src)) return src;
+      if (Array.isArray(src.rows)) return src.rows;
+      if (Array.isArray(S[`_rows${side}`])) return S[`_rows${side}`];
+      return [];
+    }catch(_){ return []; }
+  }
+  function bothRows(){ return [...getRows('A'), ...getRows('B')]; }
+
+  function extractArtists(row){
+    const out = [];
+    const disp = (row?.artist && row.artist.display) || row?.Artist || row?.['Artist'];
+    const aid  = row?.artist_id || row?.['Artist ID'] || row?.artistId || row?.artistid;
+    if (disp){ out.push({ name: disp, id: aid }); }
+    const rawNames = row?.artist_names || row?.['artist_names'];
+    const rawIds   = row?.artist_ids  || row?.['artist_ids'];
+    if (rawNames){
+      const names = String(rawNames).split(/,(?![^()]*\))/).map(s=>s.trim()).filter(Boolean);
+      const ids   = rawIds ? String(rawIds).split(/[,;|]/).map(s=>s.trim()) : [];
+      for(let i=0;i<names.length;i++){
+        out.push({ name: names[i], id: ids[i]||aid||null });
       }
-      .osb-track{ width: 6px; background: rgba(255,255,255,.20); opacity: .35; }
-      .osb-thumb{ width: 4px; background: var(--text, #f4f6fa); opacity: .75; }
-      .osb-hide .osb-thumb{ opacity: .35; }
-      /* Place on left if you prefer: set --osb-side:left on :host */
-      :host([--osb-side="left"]) .osb-thumb, 
-      :host([--osb-side="left"]) .osb-track { right: auto; left: 2px; }
-    `;
-    r.appendChild(st);
+    }
+    return out;
+  }
+  function labelFromRow(r){
+    const artist = (r?._artists && r._artists.length ? r._artists.join(' & ') : (r?.artist && r.artist.display) || r?.Artist || r?.['Artist'] || '').trim();
+    const title  = (r?._title || r?.title || r?.Title || '').trim();
+    const cat    = (r?._catalog || r?.catalog_no || r?.['Catalog#'] || r?.['Cat#'] || '').trim();
+    return { artist, title, cat };
   }
 
-  function addOverlayFor(el){
-    if (!el || el._osbBound) return;
-    el._osbBound = true;
-
-    var r = root();
-    var track = document.createElement('div');
-    var thumb = document.createElement('div');
-    track.className = 'osb-track';
-    thumb.className = 'osb-thumb';
-    // Append to shadow root so it sits *above* the scroll container (not clipped by overflow)
-    r.appendChild(track);
-    r.appendChild(thumb);
-
-    function layout(){
-      var rr = r.host ? r.host.getBoundingClientRect() : r.getBoundingClientRect();
-      var er = el.getBoundingClientRect();
-      var top = Math.max( (er.top - rr.top) + 4, 0);
-      var height = Math.max(er.height - 8, 0);
-      track.style.top = top + 'px';
-      track.style.height = height + 'px';
-      // Update thumb size/pos
-      updateThumb();
+  function buildArtistCounts(){
+    const a = new Map(), b = new Map(); // key = norm(name) => {name, id?, count}
+    const rowsA = getRows('A'); const rowsB = getRows('B');
+    function add(map, name, id){
+      const key = norm(name);
+      const v = map.get(key) || { name, id: id||null, count: 0 };
+      v.count += 1;
+      if (!v.id && id) v.id = id;
+      // Prefer longer display name (keeps casing/accents)
+      if (name && (!v.name || name.length > v.name.length)) v.name = name;
+      map.set(key, v);
     }
-
-    function updateThumb(){
-      var ch = el.clientHeight, sh = el.scrollHeight, st = el.scrollTop;
-      if (sh <= ch + 1){
-        track.style.display = 'none'; thumb.style.display = 'none';
-        return;
-      } else { track.style.display = 'block'; thumb.style.display = 'block'; }
-      var rr = r.host ? r.host.getBoundingClientRect() : r.getBoundingClientRect();
-      var er = el.getBoundingClientRect();
-      var viewH = Math.max(er.height - 8, 0);
-      var ratio = ch / sh;
-      var h = Math.max(24, Math.floor(viewH * ratio));
-      var top = Math.floor((st / (sh - ch)) * (viewH - h));
-      thumb.style.top = (Math.max((er.top - rr.top) + 4, 0) + top) + 'px';
-      thumb.style.height = h + 'px';
-    }
-
-    function show(){
-      r.classList.remove('osb-hide');
-      updateThumb();
-      clearTimeout(el._osbTO);
-      el._osbTO = setTimeout(function(){ r.classList.add('osb-hide'); }, 900);
-    }
-
-    // Bind events
-    el.addEventListener('scroll', show, { passive: true });
-    el.addEventListener('touchstart', show, { passive: true });
-    window.addEventListener('resize', layout);
-    new ResizeObserver(function(){ layout(); }).observe(el);
-
-    // Initial
-    layout();
-    show();
+    for(const r of rowsA){ for(const ainfo of extractArtists(r)){ if (ainfo.name) add(a, ainfo.name, ainfo.id); } }
+    for(const r of rowsB){ for(const ainfo of extractArtists(r)){ if (ainfo.name) add(b, ainfo.name, ainfo.id); } }
+    return { a, b };
   }
 
-  function apply(){
-    var r = root(); if (!r){ setTimeout(apply, 120); return; }
-    ensureStyles();
-    ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases']
-    .forEach(function(id){
-      var el = r.getElementById(id);
-      if (el) addOverlayFor(el);
-    });
+  function buildReleaseSets(){
+    const setA = new Map(), setB = new Map(); // rid -> row
+    for(const r of getRows('A')){
+      const rid = r?.release_id || r?.['Release ID']; if (!rid) continue;
+      setA.set(String(rid), r);
+    }
+    for(const r of getRows('B')){
+      const rid = r?.release_id || r?.['Release ID']; if (!rid) continue;
+      setB.set(String(rid), r);
+    }
+    return { setA, setB };
+  }
+
+  function csvEscape(v){
+    if (v==null) return '';
+    const s = String(v);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+    return s;
+  }
+  function toCSV(rows, header){
+    const lines = [header.map(csvEscape).join(',')];
+    for(const r of rows){ lines.push(r.map(csvEscape).join(',')); }
+    return lines.join('\n');
+  }
+  function downloadCSV(filename, csv){
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+
+  function exportSharedArtists(){
+    const { a, b } = buildArtistCounts();
+    const rows = [];
+    for(const [key, va] of a){
+      const vb = b.get(key);
+      if (!vb) continue; // shared only
+      const name = va.name || (vb && vb.name) || key;
+      const aid = va.id || (vb && vb.id) || '';
+      const countA = va.count || 0;
+      const countB = vb ? vb.count || 0 : 0;
+      const combined = countA + countB;
+      rows.push([ name, combined, countA, countB, aid, DISC_ART(aid) ]);
+    }
+    rows.sort((x,y)=> y[1]-x[1] || x[0].localeCompare(y[0]));
+    const csv = toCSV(rows, ['artist','count_combined','count_in_A','count_in_B','artist_id','artist_url']);
+    downloadCSV('shared_artists.csv', csv);
+  }
+
+  function exportOnlyArtists(side){
+    const { a, b } = buildArtistCounts();
+    const src = (side==='A') ? a : b, other = (side==='A') ? b : a;
+    const rows = [];
+    let total = 0;
+    for(const [key, v] of src){
+      if (other.has(key)) continue; // only
+      total += v.count||0;
+      rows.push([ v.name, v.count||0, v.id||'', DISC_ART(v.id) ]);
+    }
+    rows.sort((x,y)=> y[1]-x[1] || x[0].localeCompare(y[0]));
+    const csv = toCSV(rows, ['artist', `count_in_${side}`, 'artist_id', 'artist_url']);
+    downloadCSV(`only_${side.toLowerCase()}_artists.csv`, csv);
+  }
+
+  function exportSharedReleases(){
+    const { setA, setB } = buildReleaseSets();
+    const rows = [];
+    for(const [rid, row] of setA){
+      if (!setB.has(rid)) continue;
+      const lab = labelFromRow(row);
+      rows.push([ lab.artist, lab.title, lab.cat, rid, DISC_REL(rid) ]);
+    }
+    rows.sort((x,y)=> x[0].localeCompare(y[0]) || x[1].localeCompare(y[1]));
+    const csv = toCSV(rows, ['artist','title','catno','release_id','release_url']);
+    downloadCSV('shared_releases.csv', csv);
+  }
+
+  function bindButtons(){
+    const r = root(); if (!r){ setTimeout(bindButtons,120); return; }
+    // Find buttons by label text to be robust to id changes
+    function findBtn(regex){
+      const btns = Array.from(r.querySelectorAll('button'));
+      return btns.find(b => regex.test((b.textContent||'').trim().toLowerCase()));
+    }
+    const btnSharedArtists = findBtn(/export shared artists/);
+    const btnOnlyA = findBtn(/export a only \(artists\)/);
+    const btnOnlyB = findBtn(/export b only \(artists\)/);
+    const btnSharedReleases = findBtn(/export shared releases/);
+
+    if (btnSharedArtists && !btnSharedArtists._patched){
+      btnSharedArtists.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); exportSharedArtists(); });
+      btnSharedArtists._patched = true;
+    }
+    if (btnOnlyA && !btnOnlyA._patched){
+      btnOnlyA.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); exportOnlyArtists('A'); });
+      btnOnlyA._patched = true;
+    }
+    if (btnOnlyB && !btnOnlyB._patched){
+      btnOnlyB.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); exportOnlyArtists('B'); });
+      btnOnlyB._patched = true;
+    }
+    if (btnSharedReleases && !btnSharedReleases._patched){
+      btnSharedReleases.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); exportSharedReleases(); });
+      btnSharedReleases._patched = true;
+    }
+  }
+
+  // Panel header totals for Only A/B
+  function updateOnlyTotals(){
+    const r = root(); if (!r) return;
+    const { a, b } = buildArtistCounts();
+    const aOnly = []; const bOnly = [];
+    let totalA = 0, totalB = 0;
+    for(const [k, va] of a){ if (!b.has(k)){ aOnly.push(va); totalA += va.count||0; } }
+    for(const [k, vb] of b){ if (!a.has(k)){ bOnly.push(vb); totalB += vb.count||0; } }
+
+    function injectTotal(sectionId, total){
+      const section = r.getElementById(sectionId);
+      if (!section) return;
+      // Look for the section heading area (closest panel/card header)
+      const panel = section.closest('section, .panel, article, div');
+      if (!panel) return;
+      let slot = panel.querySelector('.only-total');
+      if (!slot){
+        slot = document.createElement('div');
+        slot.className = 'only-total';
+        slot.style.cssText = 'font-size:12px; opacity:.8; margin:-6px 0 6px 0;';
+        // Place just above the list (before the Sort row if present)
+        panel.insertBefore(slot, section);
+      }
+      slot.textContent = `Total ${sectionId.includes('AOnly') ? 'A' : 'B'} count: ${total}`;
+    }
+    injectTotal('listAOnlyArtists', totalA);
+    injectTotal('listBOnlyArtists', totalB);
   }
 
   function bind(){
-    var r = root(); if (!r){ setTimeout(bind, 120); return; }
-    apply();
-    var grid = r.getElementById('grid') || r;
-    var mo = new MutationObserver(function(){ apply(); });
-    mo.observe(grid, { childList:true, subtree:true });
+    bindButtons();
+    updateOnlyTotals();
   }
 
+  // Run once ready and when data changes
   if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind, { once:true }); }
   else { bind(); }
-})();
-</script>
-
-
-
-<!-- Injected: DEBUG3 overlay (container-anchored, left offset, thick, always visible) -->
-<script>
-(function debugOverlayScrollbars3(){
-  function host(){ return document.querySelector('overlap-explorer'); }
-  function root(){ var h = host(); return h && (h.shadowRoot || h); }
-  function log(){ try{ console.info.apply(console, ['[overlay-debug3]'].concat([].slice.call(arguments))); }catch(_){} }
-
-  function ensureStyles(r){
-    if (!r || r.getElementById('overlay-scrollbar-debug3-styles')) return;
-    var st = document.createElement('style');
-    st.id = 'overlay-scrollbar-debug3-styles';
-    st.textContent = `
-      /* Shift overlay slightly into the panel gutter so it doesn't overlay text */
-      .osb3-track, .osb3-thumb{
-        position: absolute;
-        left: -6px;  /* negative offset pulls it away from the text without reducing content width */
-        border-radius: 3px;
-        pointer-events: none;
-        z-index: 9999;
-        filter: drop-shadow(0 0 0.5px rgba(0,0,0,.25));
+  if (window.Store){
+    try{
+      if (Store.on){
+        Store.on('data:ready', bind);
+        Store.on('data:ab-ready', bind);
+        Store.on('data:cleared', bind);
       }
-      .osb3-track{ width: 9px; background: rgba(255,255,255,.38); opacity: 1; }
-      .osb3-thumb{ width: 6px; background: #f4f6fa; opacity: 1; }
-      .osb3-badge{
-        position: fixed; bottom: 8px; left: 8px;
-        font: 11px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-        color:#0f172a; background:#e2e8f0; border-radius:8px; padding:4px 8px;
-        box-shadow:0 1px 3px rgba(0,0,0,.25); z-index:10000;
+      if (Store.addEventListener){
+        Store.addEventListener('change', bind);
       }
-      @media (min-width: 921px){
-        .osb3-track,.osb3-thumb{ display:none !important; }
-      }
-    `;
-    r.appendChild(st);
-  }
-
-  function getContainer(el){
-    var r = root();
-    var node = el.parentElement;
-    while(node && node !== r){
-      var cs = getComputedStyle(node);
-      if (cs.position !== 'static') return node;
-      node = node.parentElement;
-    }
-    node = el.parentElement || el;
-    if (getComputedStyle(node).position === 'static'){ node.style.position = 'relative'; }
-    return node;
-  }
-
-  function attach(el){
-    if (!el || el._osb3) return;
-    var r = root();
-    var container = getContainer(el);
-    var track = document.createElement('div');
-    var thumb = document.createElement('div');
-    track.className = 'osb3-track';
-    thumb.className  = 'osb3-thumb';
-    container.appendChild(track);
-    container.appendChild(thumb);
-    el._osb3 = { track, thumb, container };
-
-    function layout(){
-      var cr = container.getBoundingClientRect();
-      var er = el.getBoundingClientRect();
-      var top = Math.max((er.top - cr.top) + 4, 0);
-      var height = Math.max(er.height - 8, 0);
-      track.style.top = top + 'px';
-      track.style.height = height + 'px';
-      update();
-    }
-
-    function update(){
-      var ch = el.clientHeight, sh = el.scrollHeight, st = el.scrollTop;
-      if (sh <= ch + 1){
-        track.style.display = 'none'; thumb.style.display = 'none';
-        return;
-      } else { track.style.display = 'block'; thumb.style.display = 'block'; }
-      var cr = container.getBoundingClientRect();
-      var er = el.getBoundingClientRect();
-      var viewH = Math.max(er.height - 8, 0);
-      var ratio = ch / sh;
-      var h = Math.max(28, Math.floor(viewH * ratio));
-      var top = Math.floor((st / (sh - ch)) * (viewH - h));
-      thumb.style.top = (Math.max((er.top - cr.top) + 4, 0) + top) + 'px';
-      thumb.style.height = h + 'px';
-    }
-
-    el.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', layout);
-    new ResizeObserver(function(){ layout(); }).observe(el);
-    layout();
-    log('attached', { id: el.id, containerTag: container.tagName });
-  }
-
-  function run(){
-    var r = root(); if (!r){ setTimeout(run, 120); return; }
-    ensureStyles(r);
-    var ids = ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'];
-    var found = 0;
-    ids.forEach(function(id){
-      var el = r.getElementById(id);
-      if (el){ attach(el); found++; }
-    });
-    log('lists scanned', { found, ids });
-  }
-
-  function bind(){
-    var r = root(); if (!r){ setTimeout(bind, 120); return; }
-    run();
-    var grid = r.getElementById('grid') || r;
-    var mo = new MutationObserver(function(){ run(); });
-    mo.observe(grid, { childList: true, subtree: true });
-  }
-
-  bind();
-  // Visual badge so you know which build is active
-  var bd = document.getElementById('overlayDebugBadge3');
-  if (!bd){
-    bd = document.createElement('div');
-    bd.id = 'overlayDebugBadge3';
-    bd.className = 'osb3-badge';
-    bd.textContent = 'Overlay DEBUG3 (' + (document.documentElement.getAttribute('data-build-version')||'n/a') + ')';
-    document.body.appendChild(bd);
+    }catch(_){}
   }
 })();
 </script>
