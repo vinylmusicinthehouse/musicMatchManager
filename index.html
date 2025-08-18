@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta name="build-version" content="v2025.08.18.1846.stable6g_hotfix5">
+\1\n<meta name="build-version" content="v2025.08.18.1846.stable6g_hotfix6">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -4728,7 +4727,7 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025.08.18.1846.stable6g_hotfix4</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">\1v2025.08.18.1846.stable6g_hotfix5</footer>
 
 
 
@@ -5169,49 +5168,42 @@ filter(q){
 })();</script>
 
 
-<style id="unified-scrollbar-mobile-fix">
-  /* Restore native scrollbars everywhere (desktop too) */
-  #listSharedArtists, #listAOnlyArtists, #listBOnlyArtists,
-  #listSharedReleases, #listAOnlyReleases, #listBOnlyReleases {
-    scrollbar-width: auto !important;
-    -ms-overflow-style: auto !important;
-  }
-  #listSharedArtists::-webkit-scrollbar,
-  #listAOnlyArtists::-webkit-scrollbar,
-  #listBOnlyArtists::-webkit-scrollbar,
-  #listSharedReleases::-webkit-scrollbar,
-  #listAOnlyReleases::-webkit-scrollbar,
-  #listBOnlyReleases::-webkit-scrollbar {
-    width: auto !important;
-    height: auto !important;
-    display: initial !important;
-  }
-
-  /* Hide any custom overlay scrollbar tracks/thumbs that were injected */
-  .osb-track, .osb-thumb, .osbF-track, .osbF-thumb {
-    display: none !important;
-  }
-
-  /* Prevent accidental horizontal scroll on narrow screens */
-  html, body { overflow-x: hidden; }
-
-  /* Make top-level two-column layout collapse on mobile */
-  @media (max-width: 920px) {
-    .row2 { display: grid; grid-template-columns: 1fr !important; gap: 16px; }
-  }
-</style>
-<script id="shadow-scroll-smoothing">
+<script id="shadow-scrollbar-override">
 (function(){
   var tries = 0;
   function inject(){
     var host = document.querySelector('overlap-explorer');
     var root = host && (host.shadowRoot || host);
     if(!root){ if(++tries < 200){ return setTimeout(inject, 50); } else { return; } }
-    // Make inner .list containers use momentum scrolling on iOS
-    var st = root.getElementById('ios-list-scroll') || document.createElement('style');
-    st.id = 'ios-list-scroll';
-    st.textContent = '.list{-webkit-overflow-scrolling: touch;}';
-    root.appendChild(st);
+    var st = root.getElementById('native-scrollbar-override');
+    if(!st){
+      st = document.createElement('style');
+      st.id = 'native-scrollbar-override';
+      st.textContent = [
+        /* Always allow native scrollbars on the 6 list panes */
+        '#listSharedArtists,#listAOnlyArtists,#listBOnlyArtists,',
+        '#listSharedReleases,#listAOnlyReleases,#listBOnlyReleases{',
+        '  overflow-y:auto !important;',
+        '  -ms-overflow-style:auto !important;',
+        '  scrollbar-width:auto !important;',
+        '  -webkit-overflow-scrolling:touch !important;',
+        '}',
+        '#listSharedArtists::-webkit-scrollbar,#listAOnlyArtists::-webkit-scrollbar,',
+        '#listBOnlyArtists::-webkit-scrollbar,#listSharedReleases::-webkit-scrollbar,',
+        '#listAOnlyReleases::-webkit-scrollbar,#listBOnlyReleases::-webkit-scrollbar{',
+        '  width:12px !important;',       /* visibly present on desktop WebKit */
+        '  height:12px !important;',
+        '  display:block !important;',
+        '}',
+        /* Hide *custom* overlay scrollbars if injected */
+        '.osb-track,.osb-thumb,.osbF-track,.osbF-thumb{',
+        '  display:none !important; opacity:0 !important; visibility:hidden !important;',
+        '}',
+        /* Avoid accidental horizontal overflow at small widths */
+        ':host{ overflow-x:hidden !important; }'
+      ].join('\n');
+      root.appendChild(st);
+    }
   }
   inject();
 })();
