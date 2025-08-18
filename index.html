@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0245
+  musicMatchManager v2025.08.18.0255
 </div>
 <script>
   (function(){ 
@@ -5298,6 +5298,73 @@ filter(q){
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, {once:true}); else bind();
+})();
+</script>
+
+<!-- Injected: Stability layer (debounce + guards) -->
+<script>
+(function stabilityLayer(){
+  function host(){ return document.querySelector('overlap-explorer'); }
+  function root(){ var h = host(); return h && (h.shadowRoot || h); }
+
+  // Generic debouncer
+  function debounce(fn, wait){
+    var t, lastArgs;
+    return function(){
+      lastArgs = arguments;
+      clearTimeout(t);
+      t = setTimeout(function(){ try{ fn.apply(null, lastArgs); }catch(e){ console.error('[debounced run]', e); } }, wait);
+    };
+  }
+
+  // Try to hook the funcs created earlier (if present)
+  var r = root();
+
+  // Patch mobile scrollbar apply() to never rebind the same list twice
+  (function patchOSB(){
+    if (!r) return;
+    var style = r.getElementById('osb-final-styles');
+    // Nothing to do if style not injected yet; we'll rely on first-run code
+    // but we ensure that each list gets a marker before observers fire again.
+    ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'].forEach(function(id){
+      var el = r.getElementById(id);
+      if (el) { if (!el.dataset.osbGuard) el.dataset.osbGuard = '1'; }
+    });
+  })();
+
+  // Debounce high-frequency rebinds triggered by Store/DOM changes
+  var debounceBind = debounce(function(){
+    try{
+      var e = new CustomEvent('mmm:rebalance');
+      document.dispatchEvent(e);
+    }catch(_){}
+  }, 120);
+
+  // If our earlier scripts added listeners to Store/MutationObserver,
+  // we add one more lightweight hook that they can listen for to refresh once.
+  document.addEventListener('DOMContentLoaded', debounceBind, {once:true});
+  document.addEventListener('mmm:data', debounceBind);
+  // Also observe the shadow root but coalesce bursts
+  (function observe(){
+    var r = root(); if (!r) { setTimeout(observe, 300); return; }
+    var grid = r.getElementById('grid') || r;
+    new MutationObserver(debounceBind).observe(grid, { childList:true, subtree:true });
+  })();
+
+  // Add no-op listeners the earlier code can optionally use
+  try{
+    if (window.Store){
+      var S = window.Store;
+      if (S.on){
+        S.on('data:ready', function(){ document.dispatchEvent(new CustomEvent('mmm:data')); });
+        S.on('data:ab-ready', function(){ document.dispatchEvent(new CustomEvent('mmm:data')); });
+        S.on('data:cleared', function(){ document.dispatchEvent(new CustomEvent('mmm:data')); });
+      }
+      if (S.addEventListener){
+        S.addEventListener('change', function(){ document.dispatchEvent(new CustomEvent('mmm:data')); });
+      }
+    }
+  }catch(_){}
 })();
 </script>
 </body></html>
