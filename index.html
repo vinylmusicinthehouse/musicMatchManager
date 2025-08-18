@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<meta name="build-version" content="v2025.08.18.1846.stable6g_hotfix5">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -466,7 +467,7 @@
 })();
 </script>
 </div>
-<div class="row2 style="margin-top:12px">
+<div class="row2" style="margin-top:12px">
     <styles-top10 side="A" title="Top 10 Styles — A only"></styles-top10>
     <styles-top10 side="B" title="Top 10 Styles — B only"></styles-top10>
   </div>
@@ -5167,4 +5168,52 @@ filter(q){
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
 })();</script>
 
+
+<style id="unified-scrollbar-mobile-fix">
+  /* Restore native scrollbars everywhere (desktop too) */
+  #listSharedArtists, #listAOnlyArtists, #listBOnlyArtists,
+  #listSharedReleases, #listAOnlyReleases, #listBOnlyReleases {
+    scrollbar-width: auto !important;
+    -ms-overflow-style: auto !important;
+  }
+  #listSharedArtists::-webkit-scrollbar,
+  #listAOnlyArtists::-webkit-scrollbar,
+  #listBOnlyArtists::-webkit-scrollbar,
+  #listSharedReleases::-webkit-scrollbar,
+  #listAOnlyReleases::-webkit-scrollbar,
+  #listBOnlyReleases::-webkit-scrollbar {
+    width: auto !important;
+    height: auto !important;
+    display: initial !important;
+  }
+
+  /* Hide any custom overlay scrollbar tracks/thumbs that were injected */
+  .osb-track, .osb-thumb, .osbF-track, .osbF-thumb {
+    display: none !important;
+  }
+
+  /* Prevent accidental horizontal scroll on narrow screens */
+  html, body { overflow-x: hidden; }
+
+  /* Make top-level two-column layout collapse on mobile */
+  @media (max-width: 920px) {
+    .row2 { display: grid; grid-template-columns: 1fr !important; gap: 16px; }
+  }
+</style>
+<script id="shadow-scroll-smoothing">
+(function(){
+  var tries = 0;
+  function inject(){
+    var host = document.querySelector('overlap-explorer');
+    var root = host && (host.shadowRoot || host);
+    if(!root){ if(++tries < 200){ return setTimeout(inject, 50); } else { return; } }
+    // Make inner .list containers use momentum scrolling on iOS
+    var st = root.getElementById('ios-list-scroll') || document.createElement('style');
+    st.id = 'ios-list-scroll';
+    st.textContent = '.list{-webkit-overflow-scrolling: touch;}';
+    root.appendChild(st);
+  }
+  inject();
+})();
+</script>
 </body></html>
