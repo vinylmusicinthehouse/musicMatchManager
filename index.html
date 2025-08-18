@@ -4727,7 +4727,7 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025.08.18.1743.stable6g_hotfix2</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025.08.18.1828.stable6g_hotfix3</footer>
 
 
 
@@ -5033,30 +5033,41 @@ filter(q){
 </script>
 
 
-<!-- Injected helpers: stable6g_hotfix2 (overlay scrollbars + find clear + single-meta export) -->
-<script>
-(function(){
-  function host(){ return document.querySelector('overlap-explorer'); }
-  function root(){ var h=host(); return h && (h.shadowRoot || h); }
+<!-- Injected helpers: v2025.08.18.1828.stable6g_hotfix3 (overlay scrollbars, hide native, find clear, single-meta export) -->
+<script>(function(){"use strict";
+  function host(){return document.querySelector('overlap-explorer');}
+  function root(){var h=host();return h&&(h.shadowRoot||h);}
   function buildVersion(){
-    try {
-      return document.documentElement.getAttribute('data-build-version')
-        || document.body.getAttribute('data-build-version')
-        || 'v2025.08.18.1743.stable6g_hotfix2';
-    } catch(_) { return 'v2025.08.18.1743.stable6g_hotfix2'; }
+    try{return document.documentElement.getAttribute('data-build-version')||document.body.getAttribute('data-build-version')||"v2025.08.18.1828.stable6g_hotfix3";}catch(_){
+      return "v2025.08.18.1828.stable6g_hotfix3";
+    }
   }
 
-  /* ===== Overlay scrollbars (iOS Safari/Chrome only) ===== */
-  function isIOSLike(){ var ua=navigator.userAgent||''; return /AppleWebKit/.test(ua) && /Mobile\/|iP(hone|ad|od)/.test(ua); }
   function ensureSBStyles(){
     var r=root(); if(!r) return;
-    if(!r.getElementById('osb-styles')){
-      var st=document.createElement('style'); st.id='osb-styles';
-      st.textContent='.osb-track,.osb-thumb{position:absolute;left:-9px;pointer-events:none;z-index:2147483000;border-radius:4px}'
-                   +'.osb-track{width:7px;background:rgba(255,255,255,.22)}'
-                   +'.osb-thumb{width:5px;background:#e5e7eb;opacity:.9}'
-                   +'.osb-hide .osb-thumb{opacity:.45}'
-                   +'@media (min-width:921px){.osb-track,.osb-thumb{display:none!important}}';
+    var st=r.getElementById('osb-styles');
+    if(!st){
+      st=document.createElement('style'); st.id='osb-styles';
+      st.textContent = `
+#listSharedArtists, #listAOnlyArtists, #listBOnlyArtists,
+#listSharedReleases, #listAOnlyReleases, #listBOnlyReleases{
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+#listSharedArtists::-webkit-scrollbar,
+#listAOnlyArtists::-webkit-scrollbar,
+#listBOnlyArtists::-webkit-scrollbar,
+#listSharedReleases::-webkit-scrollbar,
+#listAOnlyReleases::-webkit-scrollbar,
+#listBOnlyReleases::-webkit-scrollbar{
+  width: 0; height: 0; display: none;
+}
+.osb-track,.osb-thumb{position:absolute;left:-12px;pointer-events:none;z-index:2147483000;border-radius:6px}
+.osb-track{width:10px;background:rgba(255,255,255,.18)}
+.osb-thumb{width:8px;background:#e5e7eb;opacity:.95}
+.osb-hide .osb-thumb{opacity:.55}
+@media (min-width:921px){.osb-track,.osb-thumb{display:none!important}}
+`;
       r.appendChild(st);
     }
   }
@@ -5070,35 +5081,36 @@ filter(q){
     var c=containerFor(el), tr=document.createElement('div'), th=document.createElement('div');
     tr.className='osb-track'; th.className='osb-thumb'; c.appendChild(tr); c.appendChild(th);
     el._osb={track:tr,thumb:th,container:c};
-    function layout(){ var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); tr.style.top=Math.max(er.top-cr.top+4,0)+'px'; tr.style.height=Math.max(er.height-8,0)+'px'; update(); }
-    function update(){ var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop;
+    function layout(){
+      var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect();
+      tr.style.top=Math.max(er.top-cr.top+4,0)+'px'; tr.style.height=Math.max(er.height-8,0)+'px';
+      update();
+    }
+    function update(){
+      var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop;
       if(sh<=ch+1){ tr.style.display='none'; th.style.display='none'; return; }
       tr.style.display='block'; th.style.display='block';
       var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect();
-      var viewH=Math.max(er.height-8,0), ratio=ch/sh, h=Math.max(22, Math.floor(viewH*ratio));
+      var viewH=Math.max(er.height-8,0), ratio=ch/sh, h=Math.max(26, Math.floor(viewH*ratio));
       var top=Math.floor((st/(sh-ch))*(viewH-h));
       th.style.top=(Math.max(er.top-cr.top+4,0)+top)+'px'; th.style.height=h+'px';
     }
-    function peek(){ c.classList.remove('osb-hide'); update(); clearTimeout(el._osbTO); el._osbTO=setTimeout(function(){ c.classList.add('osb-hide'); }, 900); }
+    function peek(){ c.classList.remove('osb-hide'); update(); clearTimeout(el._osbTO); el._osbTO=setTimeout(function(){ c.classList.add('osb-hide'); }, 1000); }
     el.addEventListener('scroll', peek, {passive:true}); el.addEventListener('touchstart', peek, {passive:true}); window.addEventListener('resize', layout);
     new ResizeObserver(function(){ layout(); }).observe(el);
     layout(); peek();
   }
   function attachSBAll(){
-    if(!isIOSLike()) return;
     ensureSBStyles();
     var r=root(); if(!r) return;
     ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases']
-    .forEach(function(id){ var el=r.getElementById(id); if(el) attachSB(el); });
+      .forEach(function(id){ var el=r.getElementById(id); if(el) attachSB(el); });
   }
   function watchSB(){
-    if(!isIOSLike()) return;
     var r=root(); if(!r) return;
-    var mo=new MutationObserver(attachSBAll);
-    mo.observe(r,{childList:true,subtree:true});
+    var mo=new MutationObserver(attachSBAll); mo.observe(r,{childList:true,subtree:true});
   }
 
-  /* ===== Find clear (×) inside #find ===== */
   function ensureFindClear(){
     var r=root(); if(!r) return; var inp=r.getElementById('find'); if(!inp) return;
     var parent=inp.parentElement||r; if(getComputedStyle(parent).position==='static') parent.style.position='relative';
@@ -5115,89 +5127,53 @@ filter(q){
   }
   function watchFind(){
     var r=root(); if(!r) return;
-    var mo=new MutationObserver(ensureFindClear);
-    mo.observe(r,{childList:true,subtree:true});
-    ensureFindClear();
+    var mo=new MutationObserver(ensureFindClear); mo.observe(r,{childList:true,subtree:true}); ensureFindClear();
   }
 
-  /* ===== Export: single meta column, scope to explorer buttons only ===== */
-  function csvEscape(v, sep){ if(v==null) return ''; var s=String(v); var need=s.includes('"')||s.includes('\n')||s.includes('\r')||s.includes(sep); return need?('"'+s.replace(/"/g,'""')+'"'):s; }
-  function pickSep(e){
-    if(e&&e.altKey) return {sep:'\t',ext:'tsv'};
-    if(e&&e.shiftKey) return {sep:';',ext:'csv'};
+  function csvEscape(v, sep){ if(v==null) return ''; var s=String(v); var need=s.includes('"')||s.includes('\n')||s.includes('\r')||s.includes(sep); return need?('"' + s.replace(/"/g,'""') + '"'):s; }
+  function pickSep(e){ if(e&&e.altKey) return {sep:'\t',ext:'tsv'}; if(e&&e.shiftKey) return {sep:';',ext:'csv'};
     try{ var dec=(Intl.NumberFormat&&Intl.NumberFormat().format(1.1))||'1.1'; if(dec.indexOf(',')>=0) return {sep:';',ext:'csv'}; }catch(_){}
-    return {sep:',',ext:'csv'};
-  }
-  function toSeparated(rows, headers, sep){
-    var lines=[headers.map(function(h){return csvEscape(h,sep);}).join(sep)];
-    rows.forEach(function(r){ lines.push((r||[]).map(function(c){return csvEscape(c,sep);}).join(sep)); });
-    return '\ufeff'+lines.join('\r\n');
-  }
-  function exportFile(name, rows, headers, e){
-    var ver=buildVersion(), info=pickSep(e), sep=info.sep, ext=info.ext;
+    return {sep:',',ext:'csv'}; }
+  function toSeparated(rows, headers, sep){ var lines=[headers.map(function(h){return csvEscape(h,sep);}).join(sep)]; rows.forEach(function(r){ lines.push((r||[]).map(function(c){return csvEscape(c,sep);}).join(sep)); }); return '\ufeff'+lines.join('\r\n'); }
+  function exportFile(name, rows, headers, e){ var ver="v2025.08.18.1828.stable6g_hotfix3", info=pickSep(e), sep=info.sep, ext=info.ext;
     var outRows=rows.map(function(r){ return (r||[]).concat([ver]); });
     var outHdr=headers.concat(['build_version']);
     var blob=new Blob([toSeparated(outRows,outHdr,sep)],{type:(ext==='tsv'?'text/tab-separated-values':'text/csv')+';charset=utf-8;'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a'); a.href=url; a.download=name+'.'+ext; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name+'.'+ext; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   }
   function norm(s){ try{return String(s||'').toLowerCase().normalize('NFKD').replace(/[^\w\s-]+/g,'').replace(/\s+/g,' ').trim();}catch(_){return String(s||'').toLowerCase().trim();} }
-  function buildArtistMap(side){
-    var S=window.Store||{}; var src=(S.get&&S.get(side))||S[side]||S['_'+side]||null;
+  function buildArtistMap(side){ var S=window.Store||{}; var src=(S.get&&S.get(side))||S[side]||S['_'+side]||null;
     var rows=Array.isArray(src)?src:((src&&Array.isArray(src.rows))?src.rows:[]);
-    var m=new Map();
-    rows.forEach(function(r){
-      var names=r&&(r.artist_names||r['artist_names']||r._artists||r['Artists']||r['Artist']||'');
-      var ids=r&&(r.artist_ids||r['artist_ids']||'');
+    var m=new Map(); rows.forEach(function(r){
+      var names=r&&(r.artist_names||r['artist_names']||r._artists||r['Artists']||r['Artist']||''); var ids=r&&(r.artist_ids||r['artist_ids']||'');
       var ns=Array.isArray(names)?names:String(names||'').split(/\s*\/\s*|\s*&\s*|\s*,\s*/).map(function(x){return x.trim();}).filter(Boolean);
       var is=Array.isArray(ids)?ids:String(ids||'').split(/\s*;\s*/).map(function(x){return x.trim();}).filter(Boolean);
-      ns.forEach(function(nm,i){
-        var id=is[i]||(is.length===1?is[0]:'');
-        var key=norm(nm);
-        if(key==='various'||key==='various artists'||id==='194') return; // artist-only exclude
-        var v=m.get(key)||{name:nm,id:id,count:0}; v.count++; if(!v.id&&id) v.id=id; if(nm.length>(v.name||'').length) v.name=nm; m.set(key,v);
-      });
-    });
-    return m;
-  }
-  function rowsSharedArtists(){
-    var a=buildArtistMap('A'), b=buildArtistMap('B'), rows=[];
-    a.forEach(function(va,k){ var vb=b.get(k); if(!vb) return; var aid=va.id||vb.id||'';
-      rows.push([va.name||vb.name,(va.count||0)+(vb.count||0),aid,(aid?('https://www.discogs.com/artist/'+aid):''),va.count||0,vb.count||0]);
-    });
-    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); });
-    return rows;
-  }
-  function rowsOnly(side){
-    var src=buildArtistMap(side), other=buildArtistMap(side==='A'?'B':'A'), rows=[];
-    src.forEach(function(v,k){ if(other.has(k)) return; rows.push([v.name,v.count||0,v.id||'',(v.id?('https://www.discogs.com/artist/'+v.id):'')]); });
-    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); });
-    return rows;
-  }
-  function rowsSharedReleases(){
-    function rows(side){ var S=window.Store||{}; var src=(S.get&&S.get(side))||S[side]||S['_'+side]||null; return Array.isArray(src)?src:((src&&src.rows)||[]); }
+      ns.forEach(function(nm,i){ var id=is[i]||(is.length===1?is[0]:''); var key=norm(nm); if(key==='various'||key==='various artists'||id==='194') return; var v=m.get(key)||{name:nm,id:id,count:0}; v.count++; if(!v.id&&id) v.id=id; if(nm.length>(v.name||'').length) v.name=nm; m.set(key,v); });
+    }); return m; }
+  function rowsSharedArtists(){ var a=buildArtistMap('A'), b=buildArtistMap('B'), rows=[]; a.forEach(function(va,k){ var vb=b.get(k); if(!vb) return; var aid=va.id||vb.id||''; rows.push([va.name||vb.name,(va.count||0)+(vb.count||0),aid,(aid?('https://www.discogs.com/artist/'+aid):''),va.count||0,vb.count||0]); });
+    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); }); return rows; }
+  function rowsOnly(side){ var src=buildArtistMap(side), other=buildArtistMap(side==='A'?'B':'A'), rows=[]; src.forEach(function(v,k){ if(other.has(k)) return; rows.push([v.name,v.count||0,v.id||'',(v.id?('https://www.discogs.com/artist/'+v.id):'')]); });
+    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); }); return rows; }
+  function rowsSharedReleases(){ function rows(side){ var S=window.Store||{}; var src=(S.get&&S.get(side))||S[side]||S['_'+side]||null; return Array.isArray(src)?src:((src&&src.rows)||[]); }
     var A=rows('A'), B=rows('B'); var setA=new Map(), setB=new Map();
     A.forEach(function(r){ var rid=r&&(r.release_id||r['Release ID']); if(rid!=null&&rid!=='') setA.set(String(rid), r); });
     B.forEach(function(r){ var rid=r&&(r.release_id||r['Release ID']); if(rid!=null&&rid!=='') setB.set(String(rid), r); });
     var out=[]; setA.forEach(function(row,rid){ if(!setB.has(rid)) return;
       var artist=(row&&row._artists&&row._artists.length)?row._artists.join(' & '):(row&&row.artist&&row.artist.display)||(row&&(row.Artist||row['Artist'])||(row['artist_names']))||'';
-      var title=(row&&(row._title||row.title||row.Title))||'';
-      var cat=(row&&(row._catalog||row.catalog_no||row['Catalog#']||row['Cat#']))||'';
-      out.push([artist,title,cat,rid,'https://www.discogs.com/release/'+rid]);
-    });
-    out.sort(function(x,y){ return x[0].localeCompare(y[0]) || x[1].localeCompare(y[1]); });
-    return out;
-  }
+      var title=(row&&(row._title||row.title||row.Title))||''; var cat=(row&&(row._catalog||row.catalog_no||row['Catalog#']||row['Cat#']))||'';
+      out.push([artist,title,cat,rid,'https://www.discogs.com/release/'+rid]); });
+    out.sort(function(x,y){ return x[0].localeCompare(y[0]) || x[1].localeCompare(y[1]); }); return out; }
+
   function interceptExports(){
     var r=root(); if(!r) return;
     r.addEventListener('click', function(e){
       var btn = e.target.closest && e.target.closest('button, a, [role="button"]');
       if (!btn || !r.contains(btn)) return;
       var id = btn.id||''; var txt=(btn.textContent||'').trim().toLowerCase();
-      var isSharedA = id==='exBothA' || /export shared artists/.test(txt);
-      var isOnlyA   = id==='exA' || /export a only/.test(txt);
-      var isOnlyB   = id==='exB' || /export b only/.test(txt);
-      var isRelBoth = id==='exRelBoth' || id==='exBothR' || /export shared releases/.test(txt);
+      var isSharedA = id==='exBothA' || /export\s+shared\s+artists/.test(txt);
+      var isOnlyA   = id==='exA'     || /export\s+a\s+only/.test(txt);
+      var isOnlyB   = id==='exB'     || /export\s+b\s+only/.test(txt);
+      var isRelBoth = id==='exRelBoth' || id==='exBothR' || /export\s+shared\s+releases/.test(txt);
       if (!(isSharedA||isOnlyA||isOnlyB||isRelBoth)) return;
       e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
       if (isSharedA) return exportFile('shared_artists', rowsSharedArtists(), ['artist','count','artist_id','artist_url','count_in_A','count_in_B'], e);
@@ -5208,13 +5184,10 @@ filter(q){
   }
 
   function boot(){
-    try{ document.documentElement.setAttribute('data-build-version','v2025.08.18.1743.stable6g_hotfix2'); }catch(_){}
-    if ((navigator.userAgent||'').includes('Mobile')){ attachSBAll(); watchSB(); }
-    watchFind();
-    interceptExports();
+    try{ document.documentElement.setAttribute('data-build-version', "v2025.08.18.1828.stable6g_hotfix3"); }catch(_){}
+    attachSBAll(); watchSB(); watchFind(); interceptExports();
   }
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
-})();
-</script>
+})();</script>
 
 </body></html>

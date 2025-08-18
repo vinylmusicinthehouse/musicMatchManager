@@ -1,8 +1,8 @@
-# Overlap Explorer — v2025.08.18.1743.stable6g_hotfix2
+# Overlap Explorer — v2025.08.18.1828.stable6g_hotfix3
 
-This build starts from stable6f and applies only three helpers:
-- iOS overlay scrollbars (light thumb)
+Built on stable6f with only:
+- Custom overlay scrollbars (native hidden)
 - Find clear (×) inside #find
-- Export CSV/TSV with single meta column `build_version`
+- Export CSV/TSV adds only build_version meta
 
-Loader code untouched.
+Loader untouched.
