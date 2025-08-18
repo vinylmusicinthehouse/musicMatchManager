@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0223
+  musicMatchManager v2025.08.18.0231
 </div>
 <script>
   (function(){ 
@@ -5211,5 +5211,87 @@ filter(q){
     }catch(_){}
   }
 });
+</script>
+
+<!-- Injected: Only A/B header pill counts -->
+<script>
+(function enhanceOnlyBadges(){
+  function host(){ return document.querySelector('overlap-explorer'); }
+  function root(){ var h = host(); return h && (h.shadowRoot || h); }
+  function ensurePos(el){ var cs = getComputedStyle(el); if (cs.position === 'static') el.style.position = 'relative'; }
+  function badgeFor(panel){
+    var r = root(); if(!panel) return null;
+    ensurePos(panel);
+    var b = panel.querySelector('.only-badge-pill');
+    if (!b){
+      b = document.createElement('span');
+      b.className = 'pill only-badge-pill'; // reuse existing pill styling
+      // place near the top-right, leaving room for chevrons/buttons
+      b.style.cssText = 'position:absolute; top:10px; right:58px;';
+      panel.appendChild(b);
+    }
+    return b;
+  }
+  function computeTotals(){
+    var S = window.Store || {};
+    function getRows(side){
+      var src = (S.get && S.get(side)) || S[side] || S['_'+side] || {};
+      if (Array.isArray(src)) return src;
+      if (Array.isArray(src.rows)) return src.rows;
+      if (Array.isArray(S['_rows'+side])) return S['_rows'+side];
+      return [];
+    }
+    function norm(s){ return String(s||'').toLowerCase()
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[–—−]/g,'-').replace(/\s*&\s*/g,'&')
+      .replace(/\s+/g,' ').trim(); }
+    function extractArtists(row){
+      var out = [];
+      var disp = (row && row.artist && row.artist.display) || row && (row.Artist || row['Artist']);
+      if (disp){ out.push(String(disp)); }
+      var raw = row && (row.artist_names || row['artist_names']);
+      if (raw){
+        String(raw).split(/,(?![^()]*\))/).forEach(function(n){ n=n.trim(); if(n) out.push(n); });
+      }
+      return out;
+    }
+    var mapA = new Map(), mapB = new Map();
+    getRows('A').forEach(function(r){ extractArtists(r).forEach(function(n){ var k=norm(n); mapA.set(k, (mapA.get(k)||0)+1); }); });
+    getRows('B').forEach(function(r){ extractArtists(r).forEach(function(n){ var k=norm(n); mapB.set(k, (mapB.get(k)||0)+1); }); });
+    // unique counts per Only
+    var countAOnly = 0, countBOnly = 0;
+    mapA.forEach(function(_,k){ if(!mapB.has(k)) countAOnly++; });
+    mapB.forEach(function(_,k){ if(!mapA.has(k)) countBOnly++; });
+    return {countAOnly: countAOnly, countBOnly: countBOnly};
+  }
+  function apply(){
+    var r = root(); if(!r) return;
+    var Asec = r.getElementById('listAOnlyArtists');
+    var Bsec = r.getElementById('listBOnlyArtists');
+    var Apanel = Asec && Asec.closest('section, .panel, article, div');
+    var Bpanel = Bsec && Bsec.closest('section, .panel, article, div');
+    var totals = computeTotals();
+    if (Apanel){ badgeFor(Apanel).textContent = totals.countAOnly; }
+    if (Bpanel){ badgeFor(Bpanel).textContent = totals.countBOnly; }
+  }
+  function bind(){
+    apply();
+    // Observe Store signals if present
+    if (window.Store){
+      try{
+        var S = window.Store;
+        if (S.on){ S.on('data:ready', apply); S.on('data:ab-ready', apply); S.on('data:cleared', apply); }
+        if (S.addEventListener){ S.addEventListener('change', apply); }
+      }catch(_){}
+    }
+    // Also observe overlap-explorer DOM for re-renders
+    var r = root();
+    if (r){
+      var grid = r.getElementById('grid') || r;
+      new MutationObserver(function(){ apply(); }).observe(grid, {childList:true, subtree:true});
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, {once:true}); else bind();
+})();
 </script>
 </body></html>

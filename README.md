@@ -1,1 +1,1 @@
-Exports enhanced + mobile overlay scrollbars (slim, left, fade). Buttons replaced to prevent double downloads.
+Adds header pill counts to Only A/B panels; retains mobile scrollbars and deduped exports.
