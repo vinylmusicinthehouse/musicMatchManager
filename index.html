@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0127
+  musicMatchManager v2025.08.18.0134
 </div>
 <script>
   (function(){ 
@@ -4771,113 +4771,113 @@ filter(q){
   })();
 </script>
 
-<!-- Injected: Mobile-friendly custom scrollbar overlay for Overlap Explorer -->
+<!-- Injected: Absolute overlay scrollbar (iOS-friendly) -->
 <script>
-(function customMobileScrollbars(){
-  // Feature detect: only enable the overlay on WebKit mobile (iOS Safari/Chrome) where scrollbar styling is limited.
+(function overlayScrollbars(){
+  // Detect iOS WebKit (Safari/Chrome on iPhone/iPad)
   var isIOSWebKit = /AppleWebKit/.test(navigator.userAgent) && /Mobile\/|iP(hone|ad|od)/.test(navigator.userAgent);
-  if (!isIOSWebKit) return;
+  if (!isIOSWebKit) return; // Desktop/Android keep native styling
 
   function host(){ return document.querySelector('overlap-explorer'); }
   function root(){ var h = host(); return h && (h.shadowRoot || h); }
 
-  function styleRoot(){
+  function ensureStyles(){
     var r = root(); if (!r) return;
-    if (r.getElementById('fake-scrollbar-styles')) return;
+    if (r.getElementById('overlay-scrollbar-styles')) return;
     var st = document.createElement('style');
-    st.id = 'fake-scrollbar-styles';
+    st.id = 'overlay-scrollbar-styles';
     st.textContent = `
-      .fake-scrollbar-container{ position:relative; }
-      .fake-scrollbar-thumb{
-        position:absolute; right: 3px; top: 0;
-        width: 3px; border-radius: 2px;
-        background: var(--text, #f4f6fa);
-        opacity: .55; pointer-events: none;
-        transform: translateZ(0); /* GPU hint */
-        transition: opacity .2s ease;
-        z-index: 5;
+      .osb-thumb, .osb-track{
+        position: absolute;
+        right: 2px;
+        border-radius: 3px;
+        pointer-events: none;
+        z-index: 50;
       }
-      .fake-scrollbar-track{
-        position:absolute; right: 2px; top: 4px; bottom: 4px;
-        width: 5px; border-radius: 3px;
-        background: rgba(255,255,255,.18);
-        opacity: .25; pointer-events: none; z-index: 4;
-      }
-      .fake-scrollbar-hide .fake-scrollbar-thumb{ opacity: .2; }
-      @media (min-width: 921px){
-        /* Desktop/tablet wide — hide fake bar */
-        .fake-scrollbar-thumb, .fake-scrollbar-track{ display: none !important; }
-      }
+      .osb-track{ width: 6px; background: rgba(255,255,255,.20); opacity: .35; }
+      .osb-thumb{ width: 4px; background: var(--text, #f4f6fa); opacity: .75; }
+      .osb-hide .osb-thumb{ opacity: .35; }
+      /* Place on left if you prefer: set --osb-side:left on :host */
+      :host([--osb-side="left"]) .osb-thumb, 
+      :host([--osb-side="left"]) .osb-track { right: auto; left: 2px; }
     `;
     r.appendChild(st);
   }
 
-  function enhance(el){
-    if (!el || el._fakeBarBound) return;
-    el._fakeBarBound = true;
+  function addOverlayFor(el){
+    if (!el || el._osbBound) return;
+    el._osbBound = true;
 
-    // Ensure the scroll container can host absolutely positioned children
-    var cs = getComputedStyle(el);
-    if (cs.position === 'static') el.style.position = 'relative';
-
-    // Add track & thumb
+    var r = root();
     var track = document.createElement('div');
-    track.className = 'fake-scrollbar-track';
     var thumb = document.createElement('div');
-    thumb.className = 'fake-scrollbar-thumb';
-    el.classList.add('fake-scrollbar-container');
-    el.appendChild(track);
-    el.appendChild(thumb);
+    track.className = 'osb-track';
+    thumb.className = 'osb-thumb';
+    // Append to shadow root so it sits *above* the scroll container (not clipped by overflow)
+    r.appendChild(track);
+    r.appendChild(thumb);
 
-    function update(){
-      var sh = el.scrollHeight, ch = el.clientHeight, st = el.scrollTop;
-      // If no overflow, hide
+    function layout(){
+      var rr = r.host ? r.host.getBoundingClientRect() : r.getBoundingClientRect();
+      var er = el.getBoundingClientRect();
+      var top = Math.max( (er.top - rr.top) + 4, 0);
+      var height = Math.max(er.height - 8, 0);
+      track.style.top = top + 'px';
+      track.style.height = height + 'px';
+      // Update thumb size/pos
+      updateThumb();
+    }
+
+    function updateThumb(){
+      var ch = el.clientHeight, sh = el.scrollHeight, st = el.scrollTop;
       if (sh <= ch + 1){
-        thumb.style.display = 'none'; track.style.display = 'none'; return;
-      } else { thumb.style.display = 'block'; track.style.display = 'block'; }
+        track.style.display = 'none'; thumb.style.display = 'none';
+        return;
+      } else { track.style.display = 'block'; thumb.style.display = 'block'; }
+      var rr = r.host ? r.host.getBoundingClientRect() : r.getBoundingClientRect();
+      var er = el.getBoundingClientRect();
+      var viewH = Math.max(er.height - 8, 0);
       var ratio = ch / sh;
-      var h = Math.max(24, Math.floor(ch * ratio)); // min thumb size
-      var top = Math.floor((st / (sh - ch)) * (ch - h));
+      var h = Math.max(24, Math.floor(viewH * ratio));
+      var top = Math.floor((st / (sh - ch)) * (viewH - h));
+      thumb.style.top = (Math.max((er.top - rr.top) + 4, 0) + top) + 'px';
       thumb.style.height = h + 'px';
-      thumb.style.top = (4 + top) + 'px'; // align with track inset
     }
 
     function show(){
-      el.classList.remove('fake-scrollbar-hide');
-      update();
-      clearTimeout(el._hideTO);
-      el._hideTO = setTimeout(function(){ el.classList.add('fake-scrollbar-hide'); }, 800);
+      r.classList.remove('osb-hide');
+      updateThumb();
+      clearTimeout(el._osbTO);
+      el._osbTO = setTimeout(function(){ r.classList.add('osb-hide'); }, 900);
     }
 
+    // Bind events
     el.addEventListener('scroll', show, { passive: true });
     el.addEventListener('touchstart', show, { passive: true });
-    el.addEventListener('mouseenter', show, { passive: true });
+    window.addEventListener('resize', layout);
+    new ResizeObserver(function(){ layout(); }).observe(el);
 
     // Initial
-    update(); show();
-    new ResizeObserver(function(){ update(); }).observe(el);
-    // Recalc on font-size/zoom changes
-    window.addEventListener('resize', update);
+    layout();
+    show();
   }
 
   function apply(){
-    var r = root(); if (!r) { setTimeout(apply, 120); return; }
-    styleRoot();
-    // Known scrollable lists inside Overlap Explorer
-    var ids = ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'];
-    ids.forEach(function(id){
+    var r = root(); if (!r){ setTimeout(apply, 120); return; }
+    ensureStyles();
+    ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases']
+    .forEach(function(id){
       var el = r.getElementById(id);
-      if (el) enhance(el);
+      if (el) addOverlayFor(el);
     });
   }
 
-  // Re-apply when the component re-renders
   function bind(){
-    var r = root(); if (!r){ setTimeout(bind, 150); return; }
+    var r = root(); if (!r){ setTimeout(bind, 120); return; }
     apply();
     var grid = r.getElementById('grid') || r;
     var mo = new MutationObserver(function(){ apply(); });
-    mo.observe(grid, { childList: true, subtree: true });
+    mo.observe(grid, { childList:true, subtree:true });
   }
 
   if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind, { once:true }); }
