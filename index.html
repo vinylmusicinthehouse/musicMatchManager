@@ -4761,13 +4761,127 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0116
+  musicMatchManager v2025.08.18.0127
 </div>
 <script>
   (function(){ 
-    var v = "v2025.08.18.0116";
+    var v = "v2025.08.18.0122";
     console.info("[build]", { version: v, features: ["mobile-1col","native-clear","scrollbars","auto-reveal","discogs-links"] });
     document.documentElement.setAttribute("data-build-version", v);
   })();
+</script>
+
+<!-- Injected: Mobile-friendly custom scrollbar overlay for Overlap Explorer -->
+<script>
+(function customMobileScrollbars(){
+  // Feature detect: only enable the overlay on WebKit mobile (iOS Safari/Chrome) where scrollbar styling is limited.
+  var isIOSWebKit = /AppleWebKit/.test(navigator.userAgent) && /Mobile\/|iP(hone|ad|od)/.test(navigator.userAgent);
+  if (!isIOSWebKit) return;
+
+  function host(){ return document.querySelector('overlap-explorer'); }
+  function root(){ var h = host(); return h && (h.shadowRoot || h); }
+
+  function styleRoot(){
+    var r = root(); if (!r) return;
+    if (r.getElementById('fake-scrollbar-styles')) return;
+    var st = document.createElement('style');
+    st.id = 'fake-scrollbar-styles';
+    st.textContent = `
+      .fake-scrollbar-container{ position:relative; }
+      .fake-scrollbar-thumb{
+        position:absolute; right: 3px; top: 0;
+        width: 3px; border-radius: 2px;
+        background: var(--text, #f4f6fa);
+        opacity: .55; pointer-events: none;
+        transform: translateZ(0); /* GPU hint */
+        transition: opacity .2s ease;
+        z-index: 5;
+      }
+      .fake-scrollbar-track{
+        position:absolute; right: 2px; top: 4px; bottom: 4px;
+        width: 5px; border-radius: 3px;
+        background: rgba(255,255,255,.18);
+        opacity: .25; pointer-events: none; z-index: 4;
+      }
+      .fake-scrollbar-hide .fake-scrollbar-thumb{ opacity: .2; }
+      @media (min-width: 921px){
+        /* Desktop/tablet wide — hide fake bar */
+        .fake-scrollbar-thumb, .fake-scrollbar-track{ display: none !important; }
+      }
+    `;
+    r.appendChild(st);
+  }
+
+  function enhance(el){
+    if (!el || el._fakeBarBound) return;
+    el._fakeBarBound = true;
+
+    // Ensure the scroll container can host absolutely positioned children
+    var cs = getComputedStyle(el);
+    if (cs.position === 'static') el.style.position = 'relative';
+
+    // Add track & thumb
+    var track = document.createElement('div');
+    track.className = 'fake-scrollbar-track';
+    var thumb = document.createElement('div');
+    thumb.className = 'fake-scrollbar-thumb';
+    el.classList.add('fake-scrollbar-container');
+    el.appendChild(track);
+    el.appendChild(thumb);
+
+    function update(){
+      var sh = el.scrollHeight, ch = el.clientHeight, st = el.scrollTop;
+      // If no overflow, hide
+      if (sh <= ch + 1){
+        thumb.style.display = 'none'; track.style.display = 'none'; return;
+      } else { thumb.style.display = 'block'; track.style.display = 'block'; }
+      var ratio = ch / sh;
+      var h = Math.max(24, Math.floor(ch * ratio)); // min thumb size
+      var top = Math.floor((st / (sh - ch)) * (ch - h));
+      thumb.style.height = h + 'px';
+      thumb.style.top = (4 + top) + 'px'; // align with track inset
+    }
+
+    function show(){
+      el.classList.remove('fake-scrollbar-hide');
+      update();
+      clearTimeout(el._hideTO);
+      el._hideTO = setTimeout(function(){ el.classList.add('fake-scrollbar-hide'); }, 800);
+    }
+
+    el.addEventListener('scroll', show, { passive: true });
+    el.addEventListener('touchstart', show, { passive: true });
+    el.addEventListener('mouseenter', show, { passive: true });
+
+    // Initial
+    update(); show();
+    new ResizeObserver(function(){ update(); }).observe(el);
+    // Recalc on font-size/zoom changes
+    window.addEventListener('resize', update);
+  }
+
+  function apply(){
+    var r = root(); if (!r) { setTimeout(apply, 120); return; }
+    styleRoot();
+    // Known scrollable lists inside Overlap Explorer
+    var ids = ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'];
+    ids.forEach(function(id){
+      var el = r.getElementById(id);
+      if (el) enhance(el);
+    });
+  }
+
+  // Re-apply when the component re-renders
+  function bind(){
+    var r = root(); if (!r){ setTimeout(bind, 150); return; }
+    apply();
+    var grid = r.getElementById('grid') || r;
+    var mo = new MutationObserver(function(){ apply(); });
+    mo.observe(grid, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', bind, { once:true }); }
+  else { bind(); }
+})();
 </script>
 </body></html>
