@@ -4727,7 +4727,7 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025.08.18.1828.stable6g_hotfix3</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025.08.18.1846.stable6g_hotfix4</footer>
 
 
 
@@ -5033,41 +5033,31 @@ filter(q){
 </script>
 
 
-<!-- Injected helpers: v2025.08.18.1828.stable6g_hotfix3 (overlay scrollbars, hide native, find clear, single-meta export) -->
+<!-- Injected helpers: v2025.08.18.1846.stable6g_hotfix4 (overlay scrollbars, hide native, find clear, single-meta export) -->
 <script>(function(){"use strict";
   function host(){return document.querySelector('overlap-explorer');}
   function root(){var h=host();return h&&(h.shadowRoot||h);}
-  function buildVersion(){
-    try{return document.documentElement.getAttribute('data-build-version')||document.body.getAttribute('data-build-version')||"v2025.08.18.1828.stable6g_hotfix3";}catch(_){
-      return "v2025.08.18.1828.stable6g_hotfix3";
-    }
-  }
+  function ensureRoot(){var r=root(); if(!r){console.warn("[hotfix4] no explorer root yet");} return r;}
 
+  /* ===== Overlay scrollbars (custom) + hide native ===== */
   function ensureSBStyles(){
-    var r=root(); if(!r) return;
-    var st=r.getElementById('osb-styles');
-    if(!st){
-      st=document.createElement('style'); st.id='osb-styles';
-      st.textContent = `
-#listSharedArtists, #listAOnlyArtists, #listBOnlyArtists,
-#listSharedReleases, #listAOnlyReleases, #listBOnlyReleases{
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-#listSharedArtists::-webkit-scrollbar,
-#listAOnlyArtists::-webkit-scrollbar,
-#listBOnlyArtists::-webkit-scrollbar,
-#listSharedReleases::-webkit-scrollbar,
-#listAOnlyReleases::-webkit-scrollbar,
-#listBOnlyReleases::-webkit-scrollbar{
-  width: 0; height: 0; display: none;
-}
-.osb-track,.osb-thumb{position:absolute;left:-12px;pointer-events:none;z-index:2147483000;border-radius:6px}
-.osb-track{width:10px;background:rgba(255,255,255,.18)}
-.osb-thumb{width:8px;background:#e5e7eb;opacity:.95}
-.osb-hide .osb-thumb{opacity:.55}
-@media (min-width:921px){.osb-track,.osb-thumb{display:none!important}}
-`;
+    var r=ensureRoot(); if(!r) return;
+    if(!r.getElementById('osb-styles')){
+      var st=document.createElement('style'); st.id='osb-styles';
+      st.textContent = [
+        '#listSharedArtists, #listAOnlyArtists, #listBOnlyArtists,',
+        '#listSharedReleases, #listAOnlyReleases, #listBOnlyReleases{',
+        '  scrollbar-width:none;-ms-overflow-style:none;}',
+        '#listSharedArtists::-webkit-scrollbar,#listAOnlyArtists::-webkit-scrollbar,',
+        '#listBOnlyArtists::-webkit-scrollbar,#listSharedReleases::-webkit-scrollbar,',
+        '#listAOnlyReleases::-webkit-scrollbar,#listBOnlyReleases::-webkit-scrollbar{',
+        '  width:0;height:0;display:none;}',
+        '.osb-track,.osb-thumb{position:absolute;left:-12px;pointer-events:none;z-index:2147483000;border-radius:6px}',
+        '.osb-track{width:10px;background:rgba(255,255,255,.18)}',
+        '.osb-thumb{width:8px;background:#e5e7eb;opacity:.95}',
+        '.osb-hide .osb-thumb{opacity:.55}',
+        '@media (min-width:921px){.osb-track,.osb-thumb{display:none!important}}'
+      ].join('');
       r.appendChild(st);
     }
   }
@@ -5077,65 +5067,52 @@ filter(q){
     n=el.parentElement||el; if(getComputedStyle(n).position==='static') n.style.position='relative'; return n;
   }
   function attachSB(el){
-    if(!el || el._osb) return;
+    if(!el||el._osb) return;
     var c=containerFor(el), tr=document.createElement('div'), th=document.createElement('div');
     tr.className='osb-track'; th.className='osb-thumb'; c.appendChild(tr); c.appendChild(th);
     el._osb={track:tr,thumb:th,container:c};
-    function layout(){
-      var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect();
-      tr.style.top=Math.max(er.top-cr.top+4,0)+'px'; tr.style.height=Math.max(er.height-8,0)+'px';
-      update();
-    }
-    function update(){
-      var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop;
+    function layout(){ var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect();
+      tr.style.top=Math.max(er.top-cr.top+4,0)+'px'; tr.style.height=Math.max(er.height-8,0)+'px'; update(); }
+    function update(){ var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop;
       if(sh<=ch+1){ tr.style.display='none'; th.style.display='none'; return; }
       tr.style.display='block'; th.style.display='block';
       var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect();
       var viewH=Math.max(er.height-8,0), ratio=ch/sh, h=Math.max(26, Math.floor(viewH*ratio));
       var top=Math.floor((st/(sh-ch))*(viewH-h));
-      th.style.top=(Math.max(er.top-cr.top+4,0)+top)+'px'; th.style.height=h+'px';
-    }
+      th.style.top=(Math.max(er.top-cr.top+4,0)+top)+'px'; th.style.height=h+'px'; }
     function peek(){ c.classList.remove('osb-hide'); update(); clearTimeout(el._osbTO); el._osbTO=setTimeout(function(){ c.classList.add('osb-hide'); }, 1000); }
     el.addEventListener('scroll', peek, {passive:true}); el.addEventListener('touchstart', peek, {passive:true}); window.addEventListener('resize', layout);
-    new ResizeObserver(function(){ layout(); }).observe(el);
-    layout(); peek();
+    new ResizeObserver(function(){ layout(); }).observe(el); layout(); peek();
   }
   function attachSBAll(){
-    ensureSBStyles();
-    var r=root(); if(!r) return;
+    ensureSBStyles(); var r=root(); if(!r) return;
     ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases']
       .forEach(function(id){ var el=r.getElementById(id); if(el) attachSB(el); });
   }
-  function watchSB(){
-    var r=root(); if(!r) return;
-    var mo=new MutationObserver(attachSBAll); mo.observe(r,{childList:true,subtree:true});
-  }
+  function watchSB(){ var r=root(); if(!r) return; new MutationObserver(attachSBAll).observe(r,{childList:true,subtree:true}); }
 
+  /* ===== Find clear (×) ===== */
   function ensureFindClear(){
     var r=root(); if(!r) return; var inp=r.getElementById('find'); if(!inp) return;
     var parent=inp.parentElement||r; if(getComputedStyle(parent).position==='static') parent.style.position='relative';
     var btn=r.getElementById('findClearBtn');
-    if(!btn){
-      btn=document.createElement('button'); btn.id='findClearBtn'; btn.type='button'; btn.textContent='×';
+    if(!btn){ btn=document.createElement('button'); btn.id='findClearBtn'; btn.type='button'; btn.textContent='×';
       btn.setAttribute('aria-label','Clear search'); btn.title='Clear';
       btn.style.cssText='position:absolute; right:10px; top:50%; transform:translateY(-50%); width:18px; height:18px; line-height:18px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:#9aa4b2; color:#0b1020; font-weight:800; font-size:12px; display:none; z-index:2;';
       parent.appendChild(btn);
       btn.addEventListener('click', function(e){ e.preventDefault(); inp.value=''; inp.dispatchEvent(new Event('input',{bubbles:true})); inp.focus(); btn.style.display='none'; });
       inp.addEventListener('input', function(){ btn.style.display = inp.value ? 'inline-block' : 'none'; });
-      btn.style.display = inp.value ? 'inline-block' : 'none';
-    }
+      btn.style.display = inp.value ? 'inline-block' : 'none'; }
   }
-  function watchFind(){
-    var r=root(); if(!r) return;
-    var mo=new MutationObserver(ensureFindClear); mo.observe(r,{childList:true,subtree:true}); ensureFindClear();
-  }
+  function watchFind(){ var r=root(); if(!r) return; new MutationObserver(ensureFindClear).observe(r,{childList:true,subtree:true}); ensureFindClear(); }
 
-  function csvEscape(v, sep){ if(v==null) return ''; var s=String(v); var need=s.includes('"')||s.includes('\n')||s.includes('\r')||s.includes(sep); return need?('"' + s.replace(/"/g,'""') + '"'):s; }
+  /* ===== Export helpers (only build_version) ===== */
+  function csvEscape(v, sep){ if(v==null) return ''; var s=String(v); var need=s.includes('"')||s.includes('\n')||s.includes('\r')||s.includes(sep); return need?('"'+s.replace(/"/g,'""')+'"'):s; }
   function pickSep(e){ if(e&&e.altKey) return {sep:'\t',ext:'tsv'}; if(e&&e.shiftKey) return {sep:';',ext:'csv'};
     try{ var dec=(Intl.NumberFormat&&Intl.NumberFormat().format(1.1))||'1.1'; if(dec.indexOf(',')>=0) return {sep:';',ext:'csv'}; }catch(_){}
     return {sep:',',ext:'csv'}; }
   function toSeparated(rows, headers, sep){ var lines=[headers.map(function(h){return csvEscape(h,sep);}).join(sep)]; rows.forEach(function(r){ lines.push((r||[]).map(function(c){return csvEscape(c,sep);}).join(sep)); }); return '\ufeff'+lines.join('\r\n'); }
-  function exportFile(name, rows, headers, e){ var ver="v2025.08.18.1828.stable6g_hotfix3", info=pickSep(e), sep=info.sep, ext=info.ext;
+  function exportFile(name, rows, headers, e){ var ver="v2025.08.18.1846.stable6g_hotfix4", info=pickSep(e), sep=info.sep, ext=info.ext;
     var outRows=rows.map(function(r){ return (r||[]).concat([ver]); });
     var outHdr=headers.concat(['build_version']);
     var blob=new Blob([toSeparated(outRows,outHdr,sep)],{type:(ext==='tsv'?'text/tab-separated-values':'text/csv')+';charset=utf-8;'});
@@ -5184,7 +5161,7 @@ filter(q){
   }
 
   function boot(){
-    try{ document.documentElement.setAttribute('data-build-version', "v2025.08.18.1828.stable6g_hotfix3"); }catch(_){}
+    try{ document.documentElement.setAttribute('data-build-version', "v2025.08.18.1846.stable6g_hotfix4"); }catch(_){}
     attachSBAll(); watchSB(); watchFind(); interceptExports();
   }
   if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
