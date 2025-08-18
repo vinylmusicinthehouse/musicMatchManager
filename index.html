@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0231
+  musicMatchManager v2025.08.18.0240
 </div>
 <script>
   (function(){ 
@@ -5149,9 +5149,15 @@ filter(q){
     b.forEach(function(v,k){ if(!a.has(k)) totalB += v.count||0; });
     function injectTotal(listId, total, side){
       var section = r.getElementById(listId); if(!section) return;
-      var panel = section.closest('section, .panel, article, div'); if(!panel) return;
-      var slot = panel.querySelector('.only-total');
-      if(!slot){ slot = document.createElement('div'); slot.className='only-total'; slot.style.cssText='font-size:12px; opacity:.8; margin:-6px 0 6px 0;'; panel.insertBefore(slot, section); }
+      // Create or reuse a sibling element just above the section list.
+      var prev = section.previousElementSibling;
+      var slot = (prev && prev.classList && prev.classList.contains('only-total')) ? prev : null;
+      if(!slot){
+        slot = document.createElement('div');
+        slot.className = 'only-total';
+        slot.style.cssText = 'font-size:12px; opacity:.8; margin:-6px 0 6px 0;';
+        section.insertAdjacentElement('beforebegin', slot);
+      }
       slot.textContent = 'Total ' + side + ' count: ' + total;
     }
     injectTotal('listAOnlyArtists', totalA, 'A');
