@@ -1,6 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
+<style id="scrollbarGlobal">
+* { scrollbar-color: var(--text, #f4f6fa) transparent; scrollbar-width: thin; }
+*::-webkit-scrollbar       { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--text, #f4f6fa); border-radius: 8px; }
+*::-webkit-scrollbar-track { background: rgba(255,255,255,.18); border-radius: 8px; }
+</style>
+
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -4724,6 +4731,29 @@ filter(q){
   else { ensureShadowCSS(); }
   // Re-apply on resize (in case of hot layout changes)
   window.addEventListener('resize', ensureShadowCSS);
+})();
+</script>
+
+<!-- Injected: Overlap Explorer readable scrollbars (shadow-safe) -->
+<script>
+(function scrollbarFix(){
+  const el = document.querySelector('overlap-explorer');
+  const root = el && (el.shadowRoot || el);
+  if (!root) return setTimeout(scrollbarFix, 120);
+  if (root.getElementById('scrollbarStyles')) return;
+  const st = document.createElement('style');
+  st.id = 'scrollbarStyles';
+  st.textContent = `
+    :host { --scroll-thumb: var(--text, #f4f6fa); --scroll-track: rgba(255,255,255,.18); }
+    :host * { scrollbar-color: var(--scroll-thumb) transparent; scrollbar-width: thin; }
+    :host *::-webkit-scrollbar       { width: 8px; height: 8px; }
+    :host *::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 8px; }
+    :host *::-webkit-scrollbar-track { background: var(--scroll-track); border-radius: 8px; }
+    @media (max-width: 920px){
+      :host *::-webkit-scrollbar       { width: 8px; height: 8px; }
+    }
+  `;
+  root.appendChild(st);
 })();
 </script>
 </body></html>
