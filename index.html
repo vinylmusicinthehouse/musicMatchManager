@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0211
+  musicMatchManager v2025.08.18.0223
 </div>
 <script>
   (function(){ 
@@ -4997,5 +4997,219 @@ filter(q){
     }catch(_){}
   }
 })();
+</script>
+
+<!-- Injected: Mobile scrollbars (final) + Export enhancers (deduped) -->
+<script>
+(function ready(fn){ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, {once:true}); else fn(); })(function(){
+  function host(){ return document.querySelector('overlap-explorer'); }
+  function root(){ var h = host(); return h && (h.shadowRoot || h); }
+  function norm(s){ return String(s||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[–—−]/g,'-').replace(/\s*&\s*/g,'&').replace(/\s+/g,' ').trim(); }
+  var DISC_ART = function(id){ return id ? ('https://www.discogs.com/artist/' + id) : ''; };
+  var DISC_REL = function(id){ return id ? ('https://www.discogs.com/release/' + id) : ''; };
+
+  // ---------- EXPORT HELPERS ----------
+  function getRows(side){
+    try{
+      var S = window.Store || {};
+      var src = (S.get && S.get(side)) || S[side] || S['_'+side] || {};
+      if (Array.isArray(src)) return src;
+      if (Array.isArray(src.rows)) return src.rows;
+      if (Array.isArray(S['_rows'+side])) return S['_rows'+side];
+    }catch(_){}
+    return [];
+  }
+  function bothRows(){ return [].concat(getRows('A'), getRows('B')); }
+
+  function extractArtists(row){
+    var out = [];
+    var disp = (row && row.artist && row.artist.display) || row && (row.Artist || row['Artist']);
+    var aid  = row && (row.artist_id || row['Artist ID'] || row.artistId || row.artistid);
+    if (disp){ out.push({ name: String(disp), id: aid }); }
+    var rawNames = row && (row.artist_names || row['artist_names']);
+    var rawIds   = row && (row.artist_ids  || row['artist_ids']);
+    if (rawNames){
+      var names = String(rawNames).split(/,(?![^()]*\))/).map(function(s){ return s.trim(); }).filter(Boolean);
+      var ids   = rawIds ? String(rawIds).split(/[,;|]/).map(function(s){ return s.trim(); }) : [];
+      for(var i=0;i<names.length;i++){ out.push({ name: names[i], id: ids[i] || aid || null }); }
+    }
+    return out;
+  }
+  function buildArtistCounts(){
+    var a = new Map(), b = new Map();
+    function add(map, name, id){
+      var key = norm(name);
+      var v = map.get(key) || { name:name, id:id||null, count:0 };
+      v.count += 1; if (!v.id && id) v.id = id;
+      if (name && (!v.name || name.length > v.name.length)) v.name = name;
+      map.set(key, v);
+    }
+    getRows('A').forEach(function(r){ extractArtists(r).forEach(function(ai){ if(ai.name) add(a, ai.name, ai.id); }); });
+    getRows('B').forEach(function(r){ extractArtists(r).forEach(function(ai){ if(ai.name) add(b, ai.name, ai.id); }); });
+    return {a:a, b:b};
+  }
+  function buildReleaseSets(){
+    var setA = new Map(), setB = new Map();
+    getRows('A').forEach(function(r){ var rid = r && (r.release_id || r['Release ID']); if(rid) setA.set(String(rid), r); });
+    getRows('B').forEach(function(r){ var rid = r && (r.release_id || r['Release ID']); if(rid) setB.set(String(rid), r); });
+    return {setA:setA, setB:setB};
+  }
+  function labelFromRow(r){
+    var artist = (r && r._artists && r._artists.length ? r._artists.join(' & ') :
+                 (r && r.artist && r.artist.display) || (r && (r.Artist || r['Artist'])) || '').trim();
+    var title  = (r && (r._title || r.title || r.Title) || '').trim();
+    var cat    = (r && (r._catalog || r.catalog_no || r['Catalog#'] || r['Cat#']) || '').trim();
+    return {artist: artist, title: title, cat: cat};
+  }
+
+  function csvEscape(v){ if(v==null) return ''; var s=String(v); return /[",\n]/.test(s)?('"'+s.replace(/"/g,'""')+'"'):s; }
+  function toCSV(rows, header){ var lines=[header.map(csvEscape).join(',')]; rows.forEach(function(r){ lines.push(r.map(csvEscape).join(',')); }); return lines.join('\\n'); }
+  function downloadCSV(filename, csv){
+    var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+
+  function exportSharedArtists(){
+    var AB = buildArtistCounts(); var a=AB.a, b=AB.b;
+    var rows=[];
+    a.forEach(function(va, key){
+      var vb = b.get(key); if(!vb) return;
+      var name = va.name || (vb && vb.name) || key;
+      var aid = va.id || (vb && vb.id) || '';
+      var countA = va.count||0, countB = vb ? (vb.count||0) : 0;
+      rows.push([name, countA+countB, countA, countB, aid, DISC_ART(aid)]);
+    });
+    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); });
+    var csv = toCSV(rows, ['artist','count_combined','count_in_A','count_in_B','artist_id','artist_url']);
+    downloadCSV('shared_artists.csv', csv);
+  }
+
+  function exportOnlyArtists(side){
+    var AB = buildArtistCounts(); var src = side==='A'?AB.a:AB.b; var other = side==='A'?AB.b:AB.a;
+    var rows=[];
+    src.forEach(function(v, key){ if(other.has(key)) return; rows.push([v.name, v.count||0, v.id||'', DISC_ART(v.id)]); });
+    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); });
+    var csv = toCSV(rows, ['artist','count_in_'+side, 'artist_id','artist_url']);
+    downloadCSV('only_'+side.toLowerCase()+'_artists.csv', csv);
+  }
+
+  function exportSharedReleases(){
+    var ss = buildReleaseSets(), setA = ss.setA, setB = ss.setB;
+    var rows=[];
+    setA.forEach(function(row, rid){ if(!setB.has(rid)) return; var lab = labelFromRow(row); rows.push([lab.artist, lab.title, lab.cat, rid, DISC_REL(rid)]); });
+    rows.sort(function(x,y){ return x[0].localeCompare(y[0]) || x[1].localeCompare(y[1]); });
+    var csv = toCSV(rows, ['artist','title','catno','release_id','release_url']);
+    downloadCSV('shared_releases.csv', csv);
+  }
+
+  function replaceWithClone(btn){
+    if(!btn || btn._replaced) return btn;
+    var clone = btn.cloneNode(true);
+    btn.replaceWith(clone);
+    clone._replaced = true;
+    return clone;
+  }
+
+  function bindButtons(){
+    var r = root(); if(!r){ setTimeout(bindButtons, 120); return; }
+    function findBtn(rx){ var btns = [].slice.call(r.querySelectorAll('button')); return btns.find(function(b){ return rx.test((b.textContent||'').trim().toLowerCase()); }); }
+
+    var bSharedArtists = findBtn(/export shared artists/);
+    var bOnlyA = findBtn(/export a only \(artists\)/);
+    var bOnlyB = findBtn(/export b only \(artists\)/);
+    var bSharedReleases = findBtn(/export shared releases/);
+
+    if (bSharedArtists && !bSharedArtists._patched){
+      bSharedArtists = replaceWithClone(bSharedArtists);
+      bSharedArtists.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); exportSharedArtists(); });
+      bSharedArtists._patched = true;
+    }
+    if (bOnlyA && !bOnlyA._patched){
+      bOnlyA = replaceWithClone(bOnlyA);
+      bOnlyA.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); exportOnlyArtists('A'); });
+      bOnlyA._patched = true;
+    }
+    if (bOnlyB && !bOnlyB._patched){
+      bOnlyB = replaceWithClone(bOnlyB);
+      bOnlyB.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); exportOnlyArtists('B'); });
+      bOnlyB._patched = true;
+    }
+    if (bSharedReleases && !bSharedReleases._patched){
+      bSharedReleases = replaceWithClone(bSharedReleases);
+      bSharedReleases.addEventListener('click', function(e){ e.preventDefault(); e.stopImmediatePropagation(); exportSharedReleases(); });
+      bSharedReleases._patched = true;
+    }
+  }
+
+  function updateOnlyTotals(){
+    var r = root(); if(!r) return;
+    var AB = buildArtistCounts(); var a=AB.a, b=AB.b; var totalA=0,totalB=0;
+    a.forEach(function(v,k){ if(!b.has(k)) totalA += v.count||0; });
+    b.forEach(function(v,k){ if(!a.has(k)) totalB += v.count||0; });
+    function injectTotal(listId, total, side){
+      var section = r.getElementById(listId); if(!section) return;
+      var panel = section.closest('section, .panel, article, div'); if(!panel) return;
+      var slot = panel.querySelector('.only-total');
+      if(!slot){ slot = document.createElement('div'); slot.className='only-total'; slot.style.cssText='font-size:12px; opacity:.8; margin:-6px 0 6px 0;'; panel.insertBefore(slot, section); }
+      slot.textContent = 'Total ' + side + ' count: ' + total;
+    }
+    injectTotal('listAOnlyArtists', totalA, 'A');
+    injectTotal('listBOnlyArtists', totalB, 'B');
+  }
+
+  // ---------- MOBILE SCROLLBAR (final) ----------
+  (function mobileScrollbars(){
+    var isIOSWK = /AppleWebKit/.test(navigator.userAgent) && /Mobile\/|iP(hone|ad|od)/.test(navigator.userAgent);
+    if (!isIOSWK) return; // desktop/Android keep native/themed scrollbars
+
+    function ensureStyles(r){
+      if (r.getElementById('osb-final-styles')) return;
+      var st = document.createElement('style'); st.id='osb-final-styles';
+      st.textContent = `
+        .osbF-track,.osbF-thumb{ position:absolute; left:-6px; pointer-events:none; z-index:9999; border-radius:3px; }
+        .osbF-track{ width:6px; background:rgba(255,255,255,.28); opacity:.9; }
+        .osbF-thumb{ width:4px; background:var(--text,#f4f6fa); opacity:.9; }
+        .osbF-hide .osbF-thumb{ opacity:.35; }
+        @media (min-width: 921px){ .osbF-track,.osbF-thumb{ display:none !important; } }
+      `;
+      r.appendChild(st);
+    }
+    function containerFor(el){
+      var r=root(); var n=el.parentElement;
+      while(n && n!==r){ var cs=getComputedStyle(n); if(cs.position!=='static') return n; n=n.parentElement; }
+      n = el.parentElement || el; if (getComputedStyle(n).position==='static') n.style.position='relative'; return n;
+    }
+    function attach(el){
+      if (!el || el._osbF) return;
+      var r=root(), c=containerFor(el);
+      var track=document.createElement('div'), thumb=document.createElement('div');
+      track.className='osbF-track'; thumb.className='osbF-thumb';
+      c.appendChild(track); c.appendChild(thumb);
+      el._osbF={track:track,thumb:thumb,container:c};
+      function layout(){ var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); var top=Math.max((er.top-cr.top)+4,0), h=Math.max(er.height-8,0); track.style.top=top+'px'; track.style.height=h+'px'; update(); }
+      function update(){ var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop; if (sh<=ch+1){ track.style.display='none'; thumb.style.display='none'; return; } else { track.style.display='block'; thumb.style.display='block'; }
+        var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); var viewH=Math.max(er.height-8,0); var ratio=ch/sh; var h=Math.max(24, Math.floor(viewH*ratio)); var top=Math.floor((st/(sh-ch))*(viewH-h)); thumb.style.top=(Math.max((er.top-cr.top)+4,0)+top)+'px'; thumb.style.height=h+'px'; }
+      function show(){ c.classList.remove('osbF-hide'); update(); clearTimeout(el._osbFto); el._osbFto=setTimeout(function(){ c.classList.add('osbF-hide'); }, 900); }
+      el.addEventListener('scroll', show, {passive:true}); el.addEventListener('touchstart', show, {passive:true}); window.addEventListener('resize', layout); new ResizeObserver(function(){ layout(); }).observe(el);
+      layout(); show();
+    }
+    function apply(){ var r=root(); if(!r){ setTimeout(apply,120); return; } ensureStyles(r);
+      ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'].forEach(function(id){ var el=r.getElementById(id); if(el) attach(el); });
+    }
+    function bind(){ var r=root(); if(!r){ setTimeout(bind,120); return; } apply(); var grid=r.getElementById('grid')||r; new MutationObserver(function(){ apply(); }).observe(grid,{childList:true,subtree:true}); }
+    bind();
+  })();
+
+  // bind now and on data changes
+  function bindAll(){ bindButtons(); updateOnlyTotals(); }
+  bindAll();
+  if (window.Store){
+    try{
+      if (Store.on){ Store.on('data:ready', bindAll); Store.on('data:ab-ready', bindAll); Store.on('data:cleared', bindAll); }
+      if (Store.addEventListener){ Store.addEventListener('change', bindAll); }
+    }catch(_){}
+  }
+});
 </script>
 </body></html>
