@@ -1,1 +1,1 @@
-v2025.08.18.1708.stable6g
+v2025.08.18.1743.stable6g_hotfix2

@@ -1,15 +1,8 @@
-# Music Match Manager (Overlap Explorer)
-**Build:** v2025.08.18.1708.stable6g
+# Overlap Explorer — v2025.08.18.1743.stable6g_hotfix2
 
-This bundle is ready for GitHub Pages.
+This build starts from stable6f and applies only three helpers:
+- iOS overlay scrollbars (light thumb)
+- Find clear (×) inside #find
+- Export CSV/TSV with single meta column `build_version`
 
-## Files
-- `index.html` — app (self-contained)
-- `.nojekyll` — disables Jekyll on GitHub Pages
-- `VERSION.txt` — build stamp
-- `README.md` — this file
-
-### Tips
-- Alt-click export → TSV; Shift-click export → semicolon CSV.
-- Export files add a single meta column: `build_version`.
-- Mobile overlay scrollbars and the Find clear (×) are enabled in this build.
+Loader code untouched.
