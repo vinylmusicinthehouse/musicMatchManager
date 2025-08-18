@@ -1,1 +1,1 @@
-DEBUG2: container-anchored overlay scrollbar (left, thick, always visible). Logs: [overlay-debug2].
+DEBUG3: overlay inside panel with negative left offset for visual spacing. Logs: [overlay-debug3].

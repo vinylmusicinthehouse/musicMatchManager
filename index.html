@@ -4761,7 +4761,7 @@ filter(q){
 <div id="buildVersion" aria-hidden="true" style="position:fixed; right:6px; bottom:6px; 
   font: 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
   color:#9aa6b2; opacity:.78; pointer-events:none; z-index: 9999;">
-  musicMatchManager v2025.08.18.0148-debug2
+  musicMatchManager v2025.08.18.0157-debug3
 </div>
 <script>
   (function(){ 
@@ -4886,50 +4886,44 @@ filter(q){
 </script>
 
 
-<!-- Injected: DEBUG2 overlay (container-anchored, left, thick, always visible) -->
+
+<!-- Injected: DEBUG3 overlay (container-anchored, left offset, thick, always visible) -->
 <script>
-(function debugOverlayScrollbars2(){
+(function debugOverlayScrollbars3(){
   function host(){ return document.querySelector('overlap-explorer'); }
   function root(){ var h = host(); return h && (h.shadowRoot || h); }
-  function log(){ try{ console.info.apply(console, ['[overlay-debug2]'].concat([].slice.call(arguments))); }catch(_){} }
+  function log(){ try{ console.info.apply(console, ['[overlay-debug3]'].concat([].slice.call(arguments))); }catch(_){} }
 
   function ensureStyles(r){
-    if (!r || r.getElementById('overlay-scrollbar-debug2-styles')) return;
+    if (!r || r.getElementById('overlay-scrollbar-debug3-styles')) return;
     var st = document.createElement('style');
-    st.id = 'overlay-scrollbar-debug2-styles';
+    st.id = 'overlay-scrollbar-debug3-styles';
     st.textContent = `
-      .osb2-track, .osb2-thumb{
+      /* Shift overlay slightly into the panel gutter so it doesn't overlay text */
+      .osb3-track, .osb3-thumb{
         position: absolute;
-        left: 2px; /* left edge inside the panel */
+        left: -6px;  /* negative offset pulls it away from the text without reducing content width */
         border-radius: 3px;
         pointer-events: none;
         z-index: 9999;
+        filter: drop-shadow(0 0 0.5px rgba(0,0,0,.25));
       }
-      .osb2-track{ width: 10px; background: rgba(255,255,255,.45); opacity: 1; }
-      .osb2-thumb{ width: 8px; background: #f4f6fa; opacity: 1; }
-      .osb2-badge{
+      .osb3-track{ width: 9px; background: rgba(255,255,255,.38); opacity: 1; }
+      .osb3-thumb{ width: 6px; background: #f4f6fa; opacity: 1; }
+      .osb3-badge{
         position: fixed; bottom: 8px; left: 8px;
         font: 11px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-        color: #0f172a; background: #e2e8f0; border-radius: 8px; padding: 4px 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,.25); z-index: 10000;
+        color:#0f172a; background:#e2e8f0; border-radius:8px; padding:4px 8px;
+        box-shadow:0 1px 3px rgba(0,0,0,.25); z-index:10000;
+      }
+      @media (min-width: 921px){
+        .osb3-track,.osb3-thumb{ display:none !important; }
       }
     `;
     r.appendChild(st);
   }
 
-  function addBadge(v){
-    var bd = document.getElementById('overlayDebugBadge2');
-    if (bd) return;
-    bd = document.createElement('div');
-    bd.id = 'overlayDebugBadge2';
-    bd.className = 'osb2-badge';
-    bd.textContent = 'Overlay DEBUG2 (' + v + ')';
-    document.body.appendChild(bd);
-  }
-
   function getContainer(el){
-    // Prefer the first ancestor with position != static inside the shadow root;
-    // otherwise use the element's parent and mark it as relative.
     var r = root();
     var node = el.parentElement;
     while(node && node !== r){
@@ -4943,17 +4937,16 @@ filter(q){
   }
 
   function attach(el){
-    if (!el || el._osb2) return;
+    if (!el || el._osb3) return;
     var r = root();
     var container = getContainer(el);
-    // Create track/thumb inside the container so they anchor to the panel bounds
     var track = document.createElement('div');
     var thumb = document.createElement('div');
-    track.className = 'osb2-track';
-    thumb.className = 'osb2-thumb';
+    track.className = 'osb3-track';
+    thumb.className  = 'osb3-thumb';
     container.appendChild(track);
     container.appendChild(thumb);
-    el._osb2 = { track: track, thumb: thumb, container: container };
+    el._osb3 = { track, thumb, container };
 
     function layout(){
       var cr = container.getBoundingClientRect();
@@ -4981,13 +4974,11 @@ filter(q){
       thumb.style.height = h + 'px';
     }
 
-    function onScroll(){ update(); }
-    el.addEventListener('scroll', onScroll, { passive: true });
+    el.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', layout);
     new ResizeObserver(function(){ layout(); }).observe(el);
-
     layout();
-    log('attached', { id: el.id, containerTag: container.tagName, ch: el.clientHeight, sh: el.scrollHeight });
+    log('attached', { id: el.id, containerTag: container.tagName });
   }
 
   function run(){
@@ -5011,7 +5002,15 @@ filter(q){
   }
 
   bind();
-  addBadge((document.documentElement.getAttribute('data-build-version')||'n/a'));
+  // Visual badge so you know which build is active
+  var bd = document.getElementById('overlayDebugBadge3');
+  if (!bd){
+    bd = document.createElement('div');
+    bd.id = 'overlayDebugBadge3';
+    bd.className = 'osb3-badge';
+    bd.textContent = 'Overlay DEBUG3 (' + (document.documentElement.getAttribute('data-build-version')||'n/a') + ')';
+    document.body.appendChild(bd);
+  }
 })();
 </script>
 </body></html>
