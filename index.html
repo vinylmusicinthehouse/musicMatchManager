@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta name="build-version" content="v2025.08.18.1846.stable6g_hotfix7">
+<meta name="build-version" content="v2025.08.18.1846.stable6g_hotfix8">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -4728,7 +4728,7 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025\.08\.18\.1846\.stable6g_hotfix5</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025.08.18.1846.stable6g_hotfix8</footer>
 
 
 
@@ -5172,47 +5172,50 @@ filter(q){
 <script id="disable-custom-scrollbars">
 (function(){
   var tries = 0;
-  function run(){
-    var host = document.querySelector('overlap-explorer');
-    var r = host && (host.shadowRoot || host);
-    if(!r){ if(++tries < 200){ return setTimeout(run, 50); } else { return; } }
-
-    // 1) Remove any previously-inserted overlay styles/tracks
-    ['osb-styles','osb-final-styles','native-scrollbar-override'].forEach(function(id){
+  function applyReset(r){
+    ['osb-styles','osb-final-styles'].forEach(function(id){
       var el = r.getElementById(id); if(el && el.parentNode) el.parentNode.removeChild(el);
     });
     Array.from(r.querySelectorAll('.osb-track,.osb-thumb,.osbF-track,.osbF-thumb')).forEach(function(n){
       if(n && n.parentNode) n.parentNode.removeChild(n);
     });
-
-    // 2) Neutralize functions if they exist on window scope inside the bundle
-    try {
-      if (window.attachSBAll) window.attachSBAll = function(){};
-      if (window.attachScrollbars) window.attachScrollbars = function(){};
-      if (window.ensureSBStyles) window.ensureSBStyles = function(){};
-      if (window.watchSB) window.watchSB = function(){};
-    } catch(e){}
-
-    // 3) Restore native scrollbars explicitly
     var st = r.getElementById('native-scrollbars-reset');
-    if(!st){
-      st = document.createElement('style'); st.id='native-scrollbars-reset';
-      st.textContent = [
-        '#listSharedArtists,#listAOnlyArtists,#listBOnlyArtists,',
-        '#listSharedReleases,#listAOnlyReleases,#listBOnlyReleases{',
-        '  overflow-y:auto !important;',
-        '  -ms-overflow-style:auto !important;',
-        '  scrollbar-width:auto !important;',
-        '  -webkit-overflow-scrolling:touch !important;',
-        '}',
-        '#listSharedArtists::-webkit-scrollbar,#listAOnlyArtists::-webkit-scrollbar,',
-        '#listBOnlyArtists::-webkit-scrollbar,#listSharedReleases::-webkit-scrollbar,',
-        '#listAOnlyReleases::-webkit-scrollbar,#listBOnlyReleases::-webkit-scrollbar{',
-        '  width:12px !important; height:12px !important; display:block !important;',
-        '}'
-      ].join('\n');
-      r.appendChild(st);
-    }
+    if(!st){ st = document.createElement('style'); st.id='native-scrollbars-reset'; }
+    st.textContent = [
+      '#listSharedArtists,#listAOnlyArtists,#listBOnlyArtists,',
+      '#listSharedReleases,#listAOnlyReleases,#listBOnlyReleases{',
+      '  overflow-y:auto !important;',
+      '  scrollbar-width:auto !important;',
+      '  -ms-overflow-style:auto !important;',
+      '  -webkit-overflow-scrolling:touch !important;',
+      '}',
+      '#listSharedArtists::-webkit-scrollbar,#listAOnlyArtists::-webkit-scrollbar,',
+      '#listBOnlyArtists::-webkit-scrollbar,#listSharedReleases::-webkit-scrollbar,',
+      '#listAOnlyReleases::-webkit-scrollbar,#listBOnlyReleases::-webkit-scrollbar{',
+      '  width:12px !important; height:12px !important; display:block !important;',
+      '}'
+    ].join('\n');
+    if(st.parentNode !== r){ r.appendChild(st); } else { r.appendChild(st); }
+  }
+  function run(){
+    var host = document.querySelector('overlap-explorer');
+    var r = host && (host.shadowRoot || host);
+    if(!r){ if(++tries < 200){ return setTimeout(run, 50); } else { return; } }
+    applyReset(r);
+    var obs = new MutationObserver(function(muts){
+      var changed=false;
+      muts.forEach(function(m){
+        m.addedNodes && Array.from(m.addedNodes).forEach(function(n){
+          if(n.nodeType===1 && (
+             n.id==='osb-styles' || n.id==='osb-final-styles' ||
+             n.classList.contains('osb-track') || n.classList.contains('osb-thumb') ||
+             n.classList.contains('osbF-track') || n.classList.contains('osbF-thumb')
+          )){ if(n.parentNode) n.parentNode.removeChild(n); changed=true; }
+        });
+      });
+      if(changed) applyReset(r);
+    });
+    obs.observe(r,{childList:true,subtree:true});
   }
   run();
 })();
