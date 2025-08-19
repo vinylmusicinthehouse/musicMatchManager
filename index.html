@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="en" data-build-version="v2025.08.19.1609.stable6g_hotfix8">
-\1\n<meta name="build-version" content="v2025.08.19.1609.stable6g_hotfix8">
+<html lang="en" data-build-version="v2025.08.19.1624.stable6g_hotfix9">
+\1\n<meta name="build-version" content="v2025.08.19.1624.stable6g_hotfix9">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -360,6 +360,72 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+}
+</style>
+
+
+<style id="native-scrollbar-contrast">
+/* Shared list containers */
+#listSharedArtists, #listSharedReleases,
+#listAOnlyArtists, #listBOnlyArtists,
+#listAOnlyReleases, #listBOnlyReleases {
+  /* existing native scrolling from previous build */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Firefox native scrollbar colors */
+@supports (scrollbar-color: auto) {
+  #listSharedArtists, #listSharedReleases,
+  #listAOnlyArtists, #listBOnlyArtists,
+  #listAOnlyReleases, #listBOnlyReleases {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.55) rgba(255,255,255,.18);
+  }
+}
+
+/* WebKit scrollbar styling (Chromium, Safari desktop; Android Chrome) */
+#listSharedArtists::-webkit-scrollbar,
+#listSharedReleases::-webkit-scrollbar,
+#listAOnlyArtists::-webkit-scrollbar,
+#listBOnlyArtists::-webkit-scrollbar,
+#listAOnlyReleases::-webkit-scrollbar,
+#listBOnlyReleases::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+#listSharedArtists::-webkit-scrollbar-thumb,
+#listSharedReleases::-webkit-scrollbar-thumb,
+#listAOnlyArtists::-webkit-scrollbar-thumb,
+#listBOnlyArtists::-webkit-scrollbar-thumb,
+#listAOnlyReleases::-webkit-scrollbar-thumb,
+#listBOnlyReleases::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: rgba(255,255,255,.55);
+}
+#listSharedArtists::-webkit-scrollbar-track,
+#listSharedReleases::-webkit-scrollbar-track,
+#listAOnlyArtists::-webkit-scrollbar-track,
+#listBOnlyArtists::-webkit-scrollbar-track,
+#listAOnlyReleases::-webkit-scrollbar-track,
+#listBOnlyReleases::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.16);
+  border-radius: 8px;
+}
+
+/* iOS Safari fallback: increase contrast behind overlay scrollbar.
+   We add a subtle right-edge gradient only on coarse-pointer (mobile) viewports.
+   This does NOT affect scroll logic and keeps native behavior. */
+@media (hover: none) and (pointer: coarse) {
+  #listSharedArtists, #listSharedReleases,
+  #listAOnlyArtists, #listBOnlyArtists,
+  #listAOnlyReleases, #listBOnlyReleases {
+    background-image: linear-gradient(to right, transparent calc(100% - 12px), rgba(255,255,255,.20) calc(100% - 12px));
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-clip: padding-box;
+  }
 }
 </style>
 
