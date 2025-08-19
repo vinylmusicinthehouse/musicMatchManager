@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="en" data-build-version="v2025.08.19.1649.stable6g_hotfix10">
-\n<meta name="build-version" content="v2025.08.19.1649.stable6g_hotfix10">
+<html lang="en" data-build-version="v2025.08.19.2155.stable6g_hotfix12">
+\n<meta name="build-version" content="v2025.08.19.2155.stable6g_hotfix12">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -353,20 +353,21 @@
 
 </script>
 
-<style id="native-scrollbar-contrast">
+<style id="native-scrollbars-and-contrast">
 #listSharedArtists, #listSharedReleases,
 #listAOnlyArtists, #listBOnlyArtists,
 #listAOnlyReleases, #listBOnlyReleases {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
 }
 @supports (scrollbar-color: auto) {
   #listSharedArtists, #listSharedReleases,
   #listAOnlyArtists, #listBOnlyArtists,
   #listAOnlyReleases, #listBOnlyReleases {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,.55) rgba(255,255,255,.18);
+    scrollbar-color: rgba(255,255,255,.62) rgba(255,255,255,.20);
   }
 }
 #listSharedArtists::-webkit-scrollbar,
@@ -374,35 +375,33 @@
 #listAOnlyArtists::-webkit-scrollbar,
 #listBOnlyArtists::-webkit-scrollbar,
 #listAOnlyReleases::-webkit-scrollbar,
-#listBOnlyReleases::-webkit-scrollbar {
-  width: 10px; height: 10px;
-}
+#listBOnlyReleases::-webkit-scrollbar { width: 10px; height: 10px; }
 #listSharedArtists::-webkit-scrollbar-thumb,
 #listSharedReleases::-webkit-scrollbar-thumb,
 #listAOnlyArtists::-webkit-scrollbar-thumb,
 #listBOnlyArtists::-webkit-scrollbar-thumb,
 #listAOnlyReleases::-webkit-scrollbar-thumb,
-#listBOnlyReleases::-webkit-scrollbar-thumb {
-  border-radius: 8px;
-  background: rgba(255,255,255,.55);
-}
+#listBOnlyReleases::-webkit-scrollbar-thumb { border-radius: 8px; background: rgba(255,255,255,.62); }
 #listSharedArtists::-webkit-scrollbar-track,
 #listSharedReleases::-webkit-scrollbar-track,
 #listAOnlyArtists::-webkit-scrollbar-track,
 #listBOnlyArtists::-webkit-scrollbar-track,
 #listAOnlyReleases::-webkit-scrollbar-track,
-#listBOnlyReleases::-webkit-scrollbar-track {
-  background: rgba(255,255,255,.16);
-  border-radius: 8px;
-}
+#listBOnlyReleases::-webkit-scrollbar-track { background: rgba(255,255,255,.18); border-radius: 8px; }
+
 @media (hover: none) and (pointer: coarse) {
   #listSharedArtists, #listSharedReleases,
   #listAOnlyArtists, #listBOnlyArtists,
-  #listAOnlyReleases, #listBOnlyReleases {
-    background-image: linear-gradient(to right, transparent calc(100% - 12px), rgba(255,255,255,.20) calc(100% - 12px));
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    background-clip: padding-box;
+  #listAOnlyReleases, #listBOnlyReleases { position: relative; }
+  #listSharedArtists::after, #listSharedReleases::after,
+  #listAOnlyArtists::after, #listBOnlyArtists::after,
+  #listAOnlyReleases::after, #listBOnlyReleases::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 16px; height: 100%;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,.32) 100%);
   }
 }
 </style>
@@ -4782,13 +4781,13 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager — v2025.08.19.1649.stable6g_hotfix10</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager — v2025.08.19.2155.stable6g_hotfix12</footer>
 <script id="sync-build-version">
 (function(){
   try{
     var ver = document.documentElement.getAttribute('data-build-version')
            || (document.querySelector('meta[name="build-version"]')||{}).content
-           || 'v2025.08.19.1649.stable6g_hotfix10';
+           || 'v2025.08.19.2155.stable6g_hotfix12';
     var f = document.querySelector('footer');
     if (f) {
       var base = (f.textContent || '').replace(/\s*—\s*v\d.*$/, '') || 'musicMatchManager';
