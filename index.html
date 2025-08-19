@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="en" data-build-version="v2025.08.19.1624.stable6g_hotfix9">
-\1\n<meta name="build-version" content="v2025.08.19.1624.stable6g_hotfix9">
+<html lang="en" data-build-version="v2025.08.19.1649.stable6g_hotfix10">
+\n<meta name="build-version" content="v2025.08.19.1649.stable6g_hotfix10">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -353,29 +353,14 @@
 
 </script>
 
-<style id="native-scrollbars">
-#listSharedArtists, #listSharedReleases,
-#listAOnlyArtists, #listBOnlyArtists,
-#listAOnlyReleases, #listBOnlyReleases {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
-</style>
-
-
 <style id="native-scrollbar-contrast">
-/* Shared list containers */
 #listSharedArtists, #listSharedReleases,
 #listAOnlyArtists, #listBOnlyArtists,
 #listAOnlyReleases, #listBOnlyReleases {
-  /* existing native scrolling from previous build */
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
-
-/* Firefox native scrollbar colors */
 @supports (scrollbar-color: auto) {
   #listSharedArtists, #listSharedReleases,
   #listAOnlyArtists, #listBOnlyArtists,
@@ -384,16 +369,13 @@
     scrollbar-color: rgba(255,255,255,.55) rgba(255,255,255,.18);
   }
 }
-
-/* WebKit scrollbar styling (Chromium, Safari desktop; Android Chrome) */
 #listSharedArtists::-webkit-scrollbar,
 #listSharedReleases::-webkit-scrollbar,
 #listAOnlyArtists::-webkit-scrollbar,
 #listBOnlyArtists::-webkit-scrollbar,
 #listAOnlyReleases::-webkit-scrollbar,
 #listBOnlyReleases::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 10px; height: 10px;
 }
 #listSharedArtists::-webkit-scrollbar-thumb,
 #listSharedReleases::-webkit-scrollbar-thumb,
@@ -413,10 +395,6 @@
   background: rgba(255,255,255,.16);
   border-radius: 8px;
 }
-
-/* iOS Safari fallback: increase contrast behind overlay scrollbar.
-   We add a subtle right-edge gradient only on coarse-pointer (mobile) viewports.
-   This does NOT affect scroll logic and keeps native behavior. */
 @media (hover: none) and (pointer: coarse) {
   #listSharedArtists, #listSharedReleases,
   #listAOnlyArtists, #listBOnlyArtists,
@@ -4804,7 +4782,22 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">\1v2025.08.18.1846.stable6g_hotfix5</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager — v2025.08.19.1649.stable6g_hotfix10</footer>
+<script id="sync-build-version">
+(function(){
+  try{
+    var ver = document.documentElement.getAttribute('data-build-version')
+           || (document.querySelector('meta[name="build-version"]')||{}).content
+           || 'v2025.08.19.1649.stable6g_hotfix10';
+    var f = document.querySelector('footer');
+    if (f) {
+      var base = (f.textContent || '').replace(/\s*—\s*v\d.*$/, '') || 'musicMatchManager';
+      f.textContent = base + ' — ' + ver;
+    }
+  }catch(e){}
+})();
+</script>
+
 
 
 
