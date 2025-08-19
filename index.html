@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="en" data-build-version="v2025.08.19.2155.stable6g_hotfix12">
-\n<meta name="build-version" content="v2025.08.19.2155.stable6g_hotfix12">
+<html lang="en" data-build-version="v2025.08.19.2230.stable6g_hotfix13">
+\n<meta name="build-version" content="v2025.08.19.2230.stable6g_hotfix13">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -4781,7 +4781,22 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager — v2025.08.19.2155.stable6g_hotfix12</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager — v2025.08.19.2230.stable6g_hotfix13</footer>
+<script id="sync-build-version">
+(function(){
+  try{
+    var ver = document.documentElement.getAttribute('data-build-version')
+           || (document.querySelector('meta[name="build-version"]')||{}).content
+           || 'v2025.08.19.2230.stable6g_hotfix13';
+    var f = document.querySelector('footer');
+    if (f) {
+      var base = (f.textContent || '').replace(/\s*—\s*v\d.*$/, '') || 'musicMatchManager';
+      f.textContent = base + ' — ' + ver;
+    }
+  }catch(e){}
+})();
+</script>
+
 <script id="sync-build-version">
 (function(){
   try{
