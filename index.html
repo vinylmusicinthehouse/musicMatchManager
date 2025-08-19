@@ -1,6 +1,6 @@
 <!doctype html>
-<html lang="en" data-build-version="v2025.08.19.2230.stable6g_hotfix13">
-\n<meta name="build-version" content="v2025.08.19.2230.stable6g_hotfix13">
+<html lang="en" data-build-version="v2025.08.19.2237.stable6g_hotfix14">
+\n<meta name="build-version" content="v2025.08.19.2237.stable6g_hotfix14">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -402,6 +402,29 @@
     width: 16px; height: 100%;
     pointer-events: none;
     background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,.32) 100%);
+  }
+}
+</style>
+
+
+<style id="ios-scrollbar-assist-v2">
+/* Only on touch devices to avoid desktop visual noise */
+@media (hover: none) and (pointer: coarse) {
+  :root { --ios-gutter: 22px; --ios-stripe-end: 0.40; --ios-track: 0.18; }
+  #listSharedArtists, #listSharedReleases,
+  #listAOnlyArtists, #listBOnlyArtists,
+  #listAOnlyReleases, #listBOnlyReleases {
+    position: relative;
+    padding-right: var(--ios-gutter);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    /* Lighten the last ~22px so the dark overlay bar has contrast */
+    background-image:
+      linear-gradient(to right, transparent calc(100% - var(--ios-gutter) - 6px), rgba(255,255,255,var(--ios-stripe-end)) calc(100% - var(--ios-gutter)));
+    /* subtle inner edge to separate from dark bg */
+    box-shadow: inset -18px 0 14px rgba(255,255,255,.14);
+    border-right: 1px solid rgba(255,255,255,.28);
+    background-clip: padding-box, border-box;
   }
 }
 </style>
@@ -4781,13 +4804,13 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager — v2025.08.19.2230.stable6g_hotfix13</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager — v2025.08.19.2237.stable6g_hotfix14</footer>
 <script id="sync-build-version">
 (function(){
   try{
     var ver = document.documentElement.getAttribute('data-build-version')
            || (document.querySelector('meta[name="build-version"]')||{}).content
-           || 'v2025.08.19.2230.stable6g_hotfix13';
+           || 'v2025.08.19.2237.stable6g_hotfix14';
     var f = document.querySelector('footer');
     if (f) {
       var base = (f.textContent || '').replace(/\s*—\s*v\d.*$/, '') || 'musicMatchManager';
