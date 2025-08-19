@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-
-<html data-build-version="v2025.08.19.1550.stable6g_hotfix7" lang="en">
-
-<meta content="v2025.08.19.1550.stable6g_hotfix7" name="build-version"/>
-<meta charset="utf-8">
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Discogs Styles — Clean Components (v7k)</title>
-<style>
+<!doctype html>
+<html lang="en" data-build-version="v2025.08.19.1609.stable6g_hotfix8">
+\1\n<meta name="build-version" content="v2025.08.19.1609.stable6g_hotfix8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Discogs Styles — Clean Components (v7k)</title>
+  <style>
     :root{
       --bg:#0b1020; --card:#11182b; --muted:#9aa4b2; --text:#f4f6fa;
       --chip:#1b233a; --ring:0 10px 30px rgba(0,0,0,.35);
@@ -49,7 +47,9 @@
   .subtools{ display:flex; align-items:center; gap:6px; font-size:12px; margin:4px 0 6px 0; }
   .subtools select{ font-size:12px; padding:2px 6px; border-radius:8px; }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 
   /* === Unified Loader — Prominent CTAs === */
@@ -113,6 +113,7 @@
   .ul-meta{ font-size:12px; margin-top:6px; }
   .ul-sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 </style>
+
 <script>
 (function(){
   if (window.__waitStoreReady) return;
@@ -141,6 +142,7 @@
   };
 })();
 </script>
+
 <script>
 // --- Store shim with options + matches support ---
 (function(){
@@ -184,6 +186,7 @@
   }catch(e){}
 })();
 </script>
+
 <script>
 // ensure tallyObject(rows) returns {rows,total} regardless of tally's original shape
 (function(){
@@ -205,6 +208,7 @@
   };
 })();
 </script>
+
 <script>
 // --- gradientFor fallback installed early (PNG-safe solid colors) ---
 (function(){
@@ -219,7 +223,8 @@
   }
 })();
 </script>
-<script id="normalizer-v2">
+
+<script id='normalizer-v2'>
 /* ===== Normalizer V2 (hierarchy-aware) ===== */
 (function(){
   if (window.__NormalizerV2) return;
@@ -348,74 +353,90 @@
 
 </script>
 
+<style id="native-scrollbars">
+#listSharedArtists, #listSharedReleases,
+#listAOnlyArtists, #listBOnlyArtists,
+#listAOnlyReleases, #listBOnlyReleases {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+</style>
+
+</head>
 <body><h1>Top Styles — Fresh Build</h1>
-<section class="ul-card" id="unified-loader">
-<div class="section-title" style="display:flex;align-items:center;gap:10px">
-<h2>Choose Collections (Unified Loader)</h2><button class="helpbtn" data-help="loader" style="margin-left:8px" title="Loader help">?</button>
-<span class="required-chip" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 8px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.45);color:#fbbf24;border-radius:999px">Required step</span>
-</div><div class="helpbox" id="loaderHelpBox" style="display:none;margin:8px 0 12px 0">
-<div style="font-weight:700;margin-bottom:6px">Loader Help</div>
-<div><b>Getting started</b></div>
-<ul>
-<li>Pick <b>A</b> and (optionally) <b>B</b> CSV files exported from Discogs (Collection and/or Wantlist).</li>
-<li>We read <b>Artist</b>, <b>Title</b>, <b>Catalog #</b>, <b>Format</b>, <b>Genres</b>, <b>Styles</b>, <b>Release ID</b>.</li>
-<li>Names are normalized (diacritics/punctuation‑safe), <b>Formats</b> are parsed, and <b>Genres/Styles</b> are normalized when present.</li>
-<li>You’ll see overlap/summary once A (and B) finish loading.</li>
-</ul>
-<div style="margin-top:8px"><b>Export from Discogs (quick)</b></div>
-<ol style="margin:6px 0 0 18px; padding:0">
-<li>Open your <b>Collection</b> or <b>Wantlist</b> on discogs.com (desktop is easiest).</li>
-<li>Click <b>Export / Download CSV</b> and save the file.</li>
-<li>No column editing needed—the loader recognizes common Discogs headers.</li>
-<li>API‑derived CSVs work too; if <b>Release ID</b> is present we link to Discogs.</li>
-</ol>
-<div class="dz-note" style="margin-top:6px">Big libraries: if a CSV is huge, split it into parts (~10–20k rows each) and load one part at a time.</div>
-<div style="margin-top:10px"><b>Using A &amp; B (what gets compared)</b></div>
-<ul>
-<li><b>Artists:</b> compared using a normalized key (diacritics stripped, punctuation‑light). Display always shows the exact name (e.g., <i>10,000 Maniacs</i>, <i>AC/DC</i>).</li>
-<li><b>Releases:</b> if a <b>Release ID</b> exists we match on that. Otherwise we use a stable signature of <i>artist key + title + catalog + format</i> (ignoring catalog values that look like grades such as <i>VG+</i>, <i>G+</i>).</li>
-<li><b>Genres/Styles (when available):</b> the loader ingests and normalizes <b>Genres</b> and <b>Styles</b>; it also derives <code>{genre, style}</code> pairs. These fields are available to any component (e.g., <i>Top 10 Styles</i>, future “compare by style/genre”), but they don’t change basic artist/release matching unless a component opts into them.</li>
-</ul>
+  
+<section id="unified-loader" class="ul-card">
+  <div class="section-title" style="display:flex;align-items:center;gap:10px">
+    <h2>Choose Collections (Unified Loader)</h2><button class="helpbtn" data-help="loader" title="Loader help" style="margin-left:8px">?</button>
+    <span class="required-chip" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 8px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.45);color:#fbbf24;border-radius:999px">Required step</span>
+  </div><div id="loaderHelpBox" class="helpbox" style="display:none;margin:8px 0 12px 0">
+  <div style="font-weight:700;margin-bottom:6px">Loader Help</div>
+  <div><b>Getting started</b></div>
+  <ul>
+    <li>Pick <b>A</b> and (optionally) <b>B</b> CSV files exported from Discogs (Collection and/or Wantlist).</li>
+    <li>We read <b>Artist</b>, <b>Title</b>, <b>Catalog #</b>, <b>Format</b>, <b>Genres</b>, <b>Styles</b>, <b>Release ID</b>.</li>
+    <li>Names are normalized (diacritics/punctuation‑safe), <b>Formats</b> are parsed, and <b>Genres/Styles</b> are normalized when present.</li>
+    <li>You’ll see overlap/summary once A (and B) finish loading.</li>
+  </ul>
+  <div style="margin-top:8px"><b>Export from Discogs (quick)</b></div>
+  <ol style="margin:6px 0 0 18px; padding:0">
+    <li>Open your <b>Collection</b> or <b>Wantlist</b> on discogs.com (desktop is easiest).</li>
+    <li>Click <b>Export / Download CSV</b> and save the file.</li>
+    <li>No column editing needed—the loader recognizes common Discogs headers.</li>
+    <li>API‑derived CSVs work too; if <b>Release ID</b> is present we link to Discogs.</li>
+  </ol>
+  <div class="dz-note" style="margin-top:6px">Big libraries: if a CSV is huge, split it into parts (~10–20k rows each) and load one part at a time.</div>
+  <div style="margin-top:10px"><b>Using A &amp; B (what gets compared)</b></div>
+  <ul>
+    <li><b>Artists:</b> compared using a normalized key (diacritics stripped, punctuation‑light). Display always shows the exact name (e.g., <i>10,000 Maniacs</i>, <i>AC/DC</i>).</li>
+    <li><b>Releases:</b> if a <b>Release ID</b> exists we match on that. Otherwise we use a stable signature of <i>artist key + title + catalog + format</i> (ignoring catalog values that look like grades such as <i>VG+</i>, <i>G+</i>).</li>
+    <li><b>Genres/Styles (when available):</b> the loader ingests and normalizes <b>Genres</b> and <b>Styles</b>; it also derives <code>{genre, style}</code> pairs. These fields are available to any component (e.g., <i>Top 10 Styles</i>, future “compare by style/genre”), but they don’t change basic artist/release matching unless a component opts into them.</li>
+  </ul>
 </div>
-<div class="helpbox" style="display:block;margin-bottom:10px">Load two CSV exports (A &amp; B). Data will feed Top 10 Styles and other components automatically.</div>
-<div class="ul-row">
-<div>
-<div class="ul-label">Step 1 — Collection A</div>
-<label aria-label="Load CSV A" class="ul-zone" for="fileA" id="zoneA" role="button">
-<div class="ul-cta"><span class="ul-step">1</span> Load A CSV</div>
-<div class="ul-sub"><b>Click anywhere</b> or <b>Drag &amp; drop</b> a file here</div>
-<div class="ul-meta" id="metaA"><span class="footerhint">No file loaded</span></div>
-<input accept=".csv,text/csv" class="ul-sr" id="fileA" type="file"/>
-</label>
-</div>
-<div>
-<div class="ul-label">Step 2 — Collection B</div>
-<label aria-label="Load CSV B" class="ul-zone" for="fileB" id="zoneB" role="button">
-<div class="ul-cta"><span class="ul-step">2</span> Load B CSV</div>
-<div class="ul-sub"><b>Click anywhere</b> or <b>Drag &amp; drop</b> a file here</div>
-<div class="ul-meta" id="metaB"><span class="footerhint">No file loaded</span></div>
-<input accept=".csv,text/csv" class="ul-sr" id="fileB" type="file"/>
-</label>
-</div>
-</div>
-<div class="toolbar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
-<button class="export-btn" disabled="" id="swapAB">Swap A/B</button>
-<button class="export-btn" disabled="" id="clearAB">Clear</button>
-<span class="footerhint" id="ul_status">Waiting for files…</span>
-</div>
+  <div class="helpbox" style="display:block;margin-bottom:10px">Load two CSV exports (A &amp; B). Data will feed Top 10 Styles and other components automatically.</div>
+  <div class="ul-row">
+    <div>
+      <div class="ul-label">Step 1 — Collection A</div>
+      <label id="zoneA" class="ul-zone" for="fileA" role="button" aria-label="Load CSV A">
+        <div class="ul-cta"><span class="ul-step">1</span> Load A CSV</div>
+        <div class="ul-sub"><b>Click anywhere</b> or <b>Drag &amp; drop</b> a file here</div>
+        <div id="metaA" class="ul-meta"><span class="footerhint">No file loaded</span></div>
+        <input id="fileA" type="file" accept=".csv,text/csv" class="ul-sr">
+      </label>
+    </div>
+    <div>
+      <div class="ul-label">Step 2 — Collection B</div>
+      <label id="zoneB" class="ul-zone" for="fileB" role="button" aria-label="Load CSV B">
+        <div class="ul-cta"><span class="ul-step">2</span> Load B CSV</div>
+        <div class="ul-sub"><b>Click anywhere</b> or <b>Drag &amp; drop</b> a file here</div>
+        <div id="metaB" class="ul-meta"><span class="footerhint">No file loaded</span></div>
+        <input id="fileB" type="file" accept=".csv,text/csv" class="ul-sr">
+      </label>
+    </div>
+  </div>
+  <div class="toolbar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+    <button id="swapAB" class="export-btn" disabled>Swap A/B</button>
+    <button id="clearAB" class="export-btn" disabled>Clear</button>
+    <span class="footerhint" id="ul_status">Waiting for files…</span>
+  </div>
 </section>
-<!-- === Overlap Explorer (new component) === -->
-<section class="card" id="overlap-explorer-card" style="margin-top:16px">
-<overlap-explorer title="Overlap Explorer"></overlap-explorer>
+
+  <!-- === Overlap Explorer (new component) === -->
+<section id="overlap-explorer-card" class="card" style="margin-top:16px">
+  <overlap-explorer title="Overlap Explorer"></overlap-explorer>
 </section>
+
+
 <div class="card" style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-<div style="font-weight:700">Styles</div>
-<label style="display:inline-flex;gap:8px;align-items:center;color:#9aa4b2;font-size:13px">
-<input checked="" id="optShowCounts" type="checkbox"/> Show counts
+    <div style="font-weight:700">Styles</div>
+    <label style="display:inline-flex;gap:8px;align-items:center;color:#9aa4b2;font-size:13px">
+      <input id="optShowCounts" type="checkbox" checked> Show counts
     </label>
-<label style="display:inline-flex;gap:8px;align-items:center;color:#9aa4b2;font-size:13px">
-<input checked="" id="optShowPercent" type="checkbox"/> Show percent
+    <label style="display:inline-flex;gap:8px;align-items:center;color:#9aa4b2;font-size:13px">
+      <input id="optShowPercent" type="checkbox" checked> Show percent
     </label>
+  
 <script>
 // Wire "Show counts" checkbox to Store.setOptions
 (function(){
@@ -457,11 +478,13 @@
 </script>
 </div>
 <div class="row2" style="margin-top:12px">
-<styles-top10 side="A" title="Top 10 Styles — A only"></styles-top10>
-<styles-top10 side="B" title="Top 10 Styles — B only"></styles-top10>
-</div>
+    <styles-top10 side="A" title="Top 10 Styles — A only"></styles-top10>
+    <styles-top10 side="B" title="Top 10 Styles — B only"></styles-top10>
+  </div>
+
 <div style="margin-top:18px">
 </div>
+
 <script>
 // --- Style Points helpers (robust fallback) ---
 (function(){
@@ -503,6 +526,7 @@
   }
 })();
 </script>
+
 <script>
 // v10g: robust help toggles + room guarantee
 (function(){
@@ -545,6 +569,7 @@
   }, true);
 })();
 </script>
+
 <script>
 // v10h: robust auto-wire for help buttons even if markup varies
 (function(){
@@ -647,6 +672,7 @@
   else { wire(); }
 })();
 </script>
+
 <script>
 // Discogs Unified Loader (embedded) — CSV-only, normalizes styles + common fields, broadcasts to window.Store + events.
 (function(){
@@ -739,11 +765,7 @@ function splitArtistsSmart(text){
       return rows.map(normalizeRow);
     }
     // Fallback csv
-    var lines=String(text||'').replace(/\r
-/g,'
-').replace(/\r/g,'
-').split('
-');
+    var lines=String(text||'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
     if (!lines.length) return [];
     var header = splitLine(lines[0]), raw=[], i,j;
     for (i=1;i<lines.length;i++){
@@ -871,6 +893,7 @@ if (window.__waitStoreReady){
   });
 })();
 </script>
+
 <script>
 // Robust tally for StylesTop10: returns { rows:[{style,count}], total:Number }
 function tallyObject(rows){
@@ -1086,9 +1109,7 @@ this.shadowRoot.getElementById('toggle').textContent = 'Show all styles';
       const src = '"' + String(fname).replace(/"/g,'""') + '"';
       out.push([idx+1, style, r.count||0, pct.toFixed(1), src].join(','));
     });
-    const blob = new Blob([out.join('
-') + '
-'], {type:'text/csv;charset=utf-8'});
+    const blob = new Blob([out.join('\n') + '\n'], {type:'text/csv;charset=utf-8'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `styles_ranked_${(fname||'').replace(/[^\w.-]+/g,'_').slice(0,120)}.csv`;
     document.body.appendChild(a); a.click(); a.remove();
@@ -1232,6 +1253,7 @@ _drawCanvas(rows, total, w, h, title){
 function roundRect(ctx,x,y,w,h,r){ const rr=Math.min(r, h/2, w/2); ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath(); }
 if(!customElements.get('styles-top10')) if(!customElements.get('styles-top10')) if(!customElements.get('styles-top10')) customElements.define('styles-top10', StylesTop10);if(!customElements.get('styles-top10')) if(!customElements.get('styles-top10')) if(!customElements.get('styles-top10')) customElements.define('styles-top10', StylesTop10);
 </script>
+
 <script>
 // === Swap/Clear toolbar controller (minimal, self-contained) ===
 (function(){
@@ -1317,6 +1339,7 @@ try{ window.broadcast && window.broadcast(null, null); }catch(e){}
   }catch(e){ bind(); }
 })();
 </script>
+
 <script>
 // === Toolbar activator listening to discogs:* events (no Store needed) ===
 (function(){
@@ -1350,6 +1373,9 @@ try{ window.broadcast && window.broadcast(null, null); }catch(e){}
   try{ setMeta(); sync(); }catch(e){}
 })();
 </script>
+
+
+
 <script>
 // --- Top10 compatibility shim: normalize rows & harden consume ---
 (function(){
@@ -1407,6 +1433,7 @@ try{ window.broadcast && window.broadcast(null, null); }catch(e){}
   });
 })();
 </script>
+
 <script>
 // -- Robust Swap A/B patch (uses Store if available, falls back to globals) --
 (function(){
@@ -1453,13 +1480,17 @@ try{ window.broadcast && window.broadcast(null, null); }catch(e){}
   else bind();
 })();
 </script>
-<div class="card" style="margin-top:16px">
-<div style="display:flex;align-items:center;justify-content:flex-start;gap:12px;margin:0 0 6px">
-<button class="btn" disabled="" id="goGSM" style="border-color:transparent;background:linear-gradient(180deg,#16a34a,#15803d);color:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;">What's the Grade?</button>
-<span class="gsHint" style="opacity:.85;color:#cbd5e1;font-weight:600;">This is how well you match</span>
-</div>
-<groove-style-match></groove-style-match>
-</div>
+
+
+  <div class="card" style="margin-top:16px">
+    <div style="display:flex;align-items:center;justify-content:flex-start;gap:12px;margin:0 0 6px">
+      <button id="goGSM" class="btn" style="border-color:transparent;background:linear-gradient(180deg,#16a34a,#15803d);color:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;" disabled>What's the Grade?</button>
+      <span class="gsHint" style="opacity:.85;color:#cbd5e1;font-weight:600;">This is how well you match</span>
+    </div>
+    <groove-style-match></groove-style-match>
+  </div>
+
+
 <script>
 (function(){
   // --- Tier definitions ---
@@ -1974,14 +2005,11 @@ update(){ this.stopAnimations(); this.refreshDisabled();
       if(!this._GI||!this._dataA||!this._dataB){ alert('No results to export yet.'); return; }
       const Aname=(this._dataA.name||'A'), Bname=(this._dataB.name||'B');
       const header=["Rank","Style","A_Count","B_Count","GrooveIndex_Label","GrooveIndex_Score","StylePoints_Label","StylePoints_Score","FileA","FileB","Match_Score"];
-      const esc=v=>{ v=v==null?'':String(v); return /[",
-]/.test(v) ? ('"'+v.replace(/"/g,'""')+'"') : v; };
+      const esc=v=>{ v=v==null?'':String(v); return /[",\n]/.test(v) ? ('"'+v.replace(/"/g,'""')+'"') : v; };
       const giName=giTier(this._GI.GI_display).name; const spKey=spTier(this._GI.SP).key;
       const lines=[header.join(',')];
       (this._matched||[]).forEach((r,i)=>{ lines.push([i+1,r.style,r.countA,r.countB,giName,this._GI.GI_display,spKey,this._GI.SP,Aname,Bname,(this._matchScore!=null?this._matchScore:'')].map(esc).join(',')); });
-      const csvBlob=new Blob([lines.join('
-')+'
-'], {type:'text/csv;charset=utf-8'});
+      const csvBlob=new Blob([lines.join('\n')+'\n'], {type:'text/csv;charset=utf-8'});
       const a=document.createElement('a'); a.href=URL.createObjectURL(csvBlob); a.download='matched_styles.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
     }
   }
@@ -2000,6 +2028,8 @@ setDis();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wireGSM, {once:true}); else wireGSM();
 })();
 </script>
+
+
 <script>
 // Overlap Explorer — Web Component
 (function(){
@@ -2646,9 +2676,7 @@ filter(q){
           ].join(',');
           out.push(row);
         });
-        const blob = new Blob([out.join('
-')+'
-'], {type:'text/csv;charset=utf-8'});
+        const blob = new Blob([out.join('\n')+'\n'], {type:'text/csv;charset=utf-8'});
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
         a.download = `overlap_${fname}.csv`; document.body.appendChild(a); a.click(); a.remove();
         setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
@@ -2658,9 +2686,7 @@ filter(q){
       if (header.length){
         const out = [header.join(',')];
         rows.forEach(a => out.push(csvEscape(a)));
-        const blob = new Blob([out.join('
-')+'
-'], {type:'text/csv;charset=utf-8'});
+        const blob = new Blob([out.join('\n')+'\n'], {type:'text/csv;charset=utf-8'});
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
         a.download = `overlap_${fname}.csv`; document.body.appendChild(a); a.click(); a.remove();
         setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
@@ -2672,6 +2698,8 @@ filter(q){
   customElements.define('overlap-explorer', OverlapExplorer);
 })();
 </script>
+
+
 <script>
 (function(){
   function onClick(e){
@@ -2689,6 +2717,8 @@ filter(q){
   document.addEventListener('click', onClick, true);
 })();
 </script>
+
+
 <script>
 /* ==== OE FULL TAKEOVER v8 ==== */
 /* Renders all six lists from normalized stats; prevents legacy handlers from blanking;
@@ -3037,6 +3067,7 @@ filter(q){
   } else { onReady(); }
 })();
 </script>
+
 <script>
 /* ==== OE FULL TAKEOVER v9 ==== */
 /* Fixes:
@@ -3393,6 +3424,7 @@ filter(q){
   } else { onReady(); }
 })();
 </script>
+
 <script>
 /* ==== OE FULL TAKEOVER v10 ==== */
 /* Fixes:
@@ -3783,6 +3815,7 @@ filter(q){
   } else { onReady(); }
 })();
 </script>
+
 <style id="oe-v11-chev-style">
 /* Fallback chevron direction if legacy CSS misses aria-expanded or button class.
    Rotate the first svg/icon inside the header button when collapsed. */
@@ -4187,6 +4220,7 @@ filter(q){
   } else { onReady(); }
 })();
 </script>
+
 <!-- Injected: Artist ID map fixer for Discogs API CSV -->
 <script>
 (function(){
@@ -4250,6 +4284,7 @@ filter(q){
   else run();
 })();
 </script>
+
 <!-- Injected: unify link colors for artists & releases -->
 <script>
 (function(){
@@ -4305,6 +4340,7 @@ filter(q){
   else { inject(); }
 })();
 </script>
+
 <!-- Injected: API-ready auto-reveal + dynamic link maps -->
 <script>
 (function(){
@@ -4524,6 +4560,8 @@ filter(q){
   else { run(); }
 })();
 </script>
+
+
 <!-- Injected: Native cancel + Firefox fallback for #find (with health check) -->
 <script>
 (function(){
@@ -4641,6 +4679,7 @@ filter(q){
   else mount();
 })();
 </script>
+
 <!-- Injected: Resilient mobile single-column (doc + shadow) with health log -->
 <script>
 (function(){
@@ -4698,19 +4737,23 @@ filter(q){
   window.addEventListener('resize', ensureShadowCSS);
 })();
 </script>
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">v2025.08.18.1846.stable6g_hotfix5</footer>
+
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">\1v2025.08.18.1846.stable6g_hotfix5</footer>
+
+
+
+
+
+
+
+
 <!-- Injected: helpers vstable6f (exclude Various / ID 194; Excel exports; global intercept) -->
+
+
 
 <!-- Injected helpers: v2025.08.18.1846.stable6g_hotfix4 (overlay scrollbars, hide native, find clear, single-meta export) -->
 
 
-</body></meta></html><style id="native-scrollbars">
-/* Native scrollbars for collection lists */
-#listSharedArtists, #listSharedReleases,
-#listAOnlyArtists, #listBOnlyArtists,
-#listAOnlyReleases, #listBOnlyReleases {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch; /* smooth momentum on iOS */
-}
-</style>
+
+
+</body></html>
