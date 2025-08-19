@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-\1\n<meta name="build-version" content="v2025.08.18.1846.stable6g_hotfix6">
+<head>
+<meta name="build-version" content="v2025.08.18.1846.stable6g_hotfix7">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Discogs Styles — Clean Components (v7k)</title>
@@ -466,7 +467,7 @@
 })();
 </script>
 </div>
-<div class="row2" style="margin-top:12px">
+<div class="row2 style="margin-top:12px">
     <styles-top10 side="A" title="Top 10 Styles — A only"></styles-top10>
     <styles-top10 side="B" title="Top 10 Styles — B only"></styles-top10>
   </div>
@@ -4727,7 +4728,7 @@ filter(q){
 })();
 </script>
 
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">\1v2025.08.18.1846.stable6g_hotfix5</footer>
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025\.08\.18\.1846\.stable6g_hotfix5</footer>
 
 
 
@@ -5168,19 +5169,35 @@ filter(q){
 })();</script>
 
 
-<script id="shadow-scrollbar-override">
+<script id="disable-custom-scrollbars">
 (function(){
   var tries = 0;
-  function inject(){
+  function run(){
     var host = document.querySelector('overlap-explorer');
-    var root = host && (host.shadowRoot || host);
-    if(!root){ if(++tries < 200){ return setTimeout(inject, 50); } else { return; } }
-    var st = root.getElementById('native-scrollbar-override');
+    var r = host && (host.shadowRoot || host);
+    if(!r){ if(++tries < 200){ return setTimeout(run, 50); } else { return; } }
+
+    // 1) Remove any previously-inserted overlay styles/tracks
+    ['osb-styles','osb-final-styles','native-scrollbar-override'].forEach(function(id){
+      var el = r.getElementById(id); if(el && el.parentNode) el.parentNode.removeChild(el);
+    });
+    Array.from(r.querySelectorAll('.osb-track,.osb-thumb,.osbF-track,.osbF-thumb')).forEach(function(n){
+      if(n && n.parentNode) n.parentNode.removeChild(n);
+    });
+
+    // 2) Neutralize functions if they exist on window scope inside the bundle
+    try {
+      if (window.attachSBAll) window.attachSBAll = function(){};
+      if (window.attachScrollbars) window.attachScrollbars = function(){};
+      if (window.ensureSBStyles) window.ensureSBStyles = function(){};
+      if (window.watchSB) window.watchSB = function(){};
+    } catch(e){}
+
+    // 3) Restore native scrollbars explicitly
+    var st = r.getElementById('native-scrollbars-reset');
     if(!st){
-      st = document.createElement('style');
-      st.id = 'native-scrollbar-override';
+      st = document.createElement('style'); st.id='native-scrollbars-reset';
       st.textContent = [
-        /* Always allow native scrollbars on the 6 list panes */
         '#listSharedArtists,#listAOnlyArtists,#listBOnlyArtists,',
         '#listSharedReleases,#listAOnlyReleases,#listBOnlyReleases{',
         '  overflow-y:auto !important;',
@@ -5191,21 +5208,13 @@ filter(q){
         '#listSharedArtists::-webkit-scrollbar,#listAOnlyArtists::-webkit-scrollbar,',
         '#listBOnlyArtists::-webkit-scrollbar,#listSharedReleases::-webkit-scrollbar,',
         '#listAOnlyReleases::-webkit-scrollbar,#listBOnlyReleases::-webkit-scrollbar{',
-        '  width:12px !important;',       /* visibly present on desktop WebKit */
-        '  height:12px !important;',
-        '  display:block !important;',
-        '}',
-        /* Hide *custom* overlay scrollbars if injected */
-        '.osb-track,.osb-thumb,.osbF-track,.osbF-thumb{',
-        '  display:none !important; opacity:0 !important; visibility:hidden !important;',
-        '}',
-        /* Avoid accidental horizontal overflow at small widths */
-        ':host{ overflow-x:hidden !important; }'
+        '  width:12px !important; height:12px !important; display:block !important;',
+        '}'
       ].join('\n');
-      root.appendChild(st);
+      r.appendChild(st);
     }
   }
-  inject();
+  run();
 })();
 </script>
 </body></html>
