@@ -1,11 +1,12 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta name="build-version" content="v2025.08.18.1846.stable6g_hotfix8">
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Discogs Styles — Clean Components (v7k)</title>
-  <style>
+<!DOCTYPE html>
+
+<html data-build-version="v2025.08.19.1550.stable6g_hotfix7" lang="en">
+
+<meta content="v2025.08.19.1550.stable6g_hotfix7" name="build-version"/>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Discogs Styles — Clean Components (v7k)</title>
+<style>
     :root{
       --bg:#0b1020; --card:#11182b; --muted:#9aa4b2; --text:#f4f6fa;
       --chip:#1b233a; --ring:0 10px 30px rgba(0,0,0,.35);
@@ -48,9 +49,7 @@
   .subtools{ display:flex; align-items:center; gap:6px; font-size:12px; margin:4px 0 6px 0; }
   .subtools select{ font-size:12px; padding:2px 6px; border-radius:8px; }
 </style>
-  
-
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 
   /* === Unified Loader — Prominent CTAs === */
@@ -114,7 +113,6 @@
   .ul-meta{ font-size:12px; margin-top:6px; }
   .ul-sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 </style>
-
 <script>
 (function(){
   if (window.__waitStoreReady) return;
@@ -143,7 +141,6 @@
   };
 })();
 </script>
-
 <script>
 // --- Store shim with options + matches support ---
 (function(){
@@ -187,7 +184,6 @@
   }catch(e){}
 })();
 </script>
-
 <script>
 // ensure tallyObject(rows) returns {rows,total} regardless of tally's original shape
 (function(){
@@ -209,7 +205,6 @@
   };
 })();
 </script>
-
 <script>
 // --- gradientFor fallback installed early (PNG-safe solid colors) ---
 (function(){
@@ -224,8 +219,7 @@
   }
 })();
 </script>
-
-<script id='normalizer-v2'>
+<script id="normalizer-v2">
 /* ===== Normalizer V2 (hierarchy-aware) ===== */
 (function(){
   if (window.__NormalizerV2) return;
@@ -353,80 +347,75 @@
 })();
 
 </script>
-</head>
+
 <body><h1>Top Styles — Fresh Build</h1>
-  
-<section id="unified-loader" class="ul-card">
-  <div class="section-title" style="display:flex;align-items:center;gap:10px">
-    <h2>Choose Collections (Unified Loader)</h2><button class="helpbtn" data-help="loader" title="Loader help" style="margin-left:8px">?</button>
-    <span class="required-chip" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 8px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.45);color:#fbbf24;border-radius:999px">Required step</span>
-  </div><div id="loaderHelpBox" class="helpbox" style="display:none;margin:8px 0 12px 0">
-  <div style="font-weight:700;margin-bottom:6px">Loader Help</div>
-  <div><b>Getting started</b></div>
-  <ul>
-    <li>Pick <b>A</b> and (optionally) <b>B</b> CSV files exported from Discogs (Collection and/or Wantlist).</li>
-    <li>We read <b>Artist</b>, <b>Title</b>, <b>Catalog #</b>, <b>Format</b>, <b>Genres</b>, <b>Styles</b>, <b>Release ID</b>.</li>
-    <li>Names are normalized (diacritics/punctuation‑safe), <b>Formats</b> are parsed, and <b>Genres/Styles</b> are normalized when present.</li>
-    <li>You’ll see overlap/summary once A (and B) finish loading.</li>
-  </ul>
-  <div style="margin-top:8px"><b>Export from Discogs (quick)</b></div>
-  <ol style="margin:6px 0 0 18px; padding:0">
-    <li>Open your <b>Collection</b> or <b>Wantlist</b> on discogs.com (desktop is easiest).</li>
-    <li>Click <b>Export / Download CSV</b> and save the file.</li>
-    <li>No column editing needed—the loader recognizes common Discogs headers.</li>
-    <li>API‑derived CSVs work too; if <b>Release ID</b> is present we link to Discogs.</li>
-  </ol>
-  <div class="dz-note" style="margin-top:6px">Big libraries: if a CSV is huge, split it into parts (~10–20k rows each) and load one part at a time.</div>
-  <div style="margin-top:10px"><b>Using A &amp; B (what gets compared)</b></div>
-  <ul>
-    <li><b>Artists:</b> compared using a normalized key (diacritics stripped, punctuation‑light). Display always shows the exact name (e.g., <i>10,000 Maniacs</i>, <i>AC/DC</i>).</li>
-    <li><b>Releases:</b> if a <b>Release ID</b> exists we match on that. Otherwise we use a stable signature of <i>artist key + title + catalog + format</i> (ignoring catalog values that look like grades such as <i>VG+</i>, <i>G+</i>).</li>
-    <li><b>Genres/Styles (when available):</b> the loader ingests and normalizes <b>Genres</b> and <b>Styles</b>; it also derives <code>{genre, style}</code> pairs. These fields are available to any component (e.g., <i>Top 10 Styles</i>, future “compare by style/genre”), but they don’t change basic artist/release matching unless a component opts into them.</li>
-  </ul>
+<section class="ul-card" id="unified-loader">
+<div class="section-title" style="display:flex;align-items:center;gap:10px">
+<h2>Choose Collections (Unified Loader)</h2><button class="helpbtn" data-help="loader" style="margin-left:8px" title="Loader help">?</button>
+<span class="required-chip" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 8px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.45);color:#fbbf24;border-radius:999px">Required step</span>
+</div><div class="helpbox" id="loaderHelpBox" style="display:none;margin:8px 0 12px 0">
+<div style="font-weight:700;margin-bottom:6px">Loader Help</div>
+<div><b>Getting started</b></div>
+<ul>
+<li>Pick <b>A</b> and (optionally) <b>B</b> CSV files exported from Discogs (Collection and/or Wantlist).</li>
+<li>We read <b>Artist</b>, <b>Title</b>, <b>Catalog #</b>, <b>Format</b>, <b>Genres</b>, <b>Styles</b>, <b>Release ID</b>.</li>
+<li>Names are normalized (diacritics/punctuation‑safe), <b>Formats</b> are parsed, and <b>Genres/Styles</b> are normalized when present.</li>
+<li>You’ll see overlap/summary once A (and B) finish loading.</li>
+</ul>
+<div style="margin-top:8px"><b>Export from Discogs (quick)</b></div>
+<ol style="margin:6px 0 0 18px; padding:0">
+<li>Open your <b>Collection</b> or <b>Wantlist</b> on discogs.com (desktop is easiest).</li>
+<li>Click <b>Export / Download CSV</b> and save the file.</li>
+<li>No column editing needed—the loader recognizes common Discogs headers.</li>
+<li>API‑derived CSVs work too; if <b>Release ID</b> is present we link to Discogs.</li>
+</ol>
+<div class="dz-note" style="margin-top:6px">Big libraries: if a CSV is huge, split it into parts (~10–20k rows each) and load one part at a time.</div>
+<div style="margin-top:10px"><b>Using A &amp; B (what gets compared)</b></div>
+<ul>
+<li><b>Artists:</b> compared using a normalized key (diacritics stripped, punctuation‑light). Display always shows the exact name (e.g., <i>10,000 Maniacs</i>, <i>AC/DC</i>).</li>
+<li><b>Releases:</b> if a <b>Release ID</b> exists we match on that. Otherwise we use a stable signature of <i>artist key + title + catalog + format</i> (ignoring catalog values that look like grades such as <i>VG+</i>, <i>G+</i>).</li>
+<li><b>Genres/Styles (when available):</b> the loader ingests and normalizes <b>Genres</b> and <b>Styles</b>; it also derives <code>{genre, style}</code> pairs. These fields are available to any component (e.g., <i>Top 10 Styles</i>, future “compare by style/genre”), but they don’t change basic artist/release matching unless a component opts into them.</li>
+</ul>
 </div>
-  <div class="helpbox" style="display:block;margin-bottom:10px">Load two CSV exports (A &amp; B). Data will feed Top 10 Styles and other components automatically.</div>
-  <div class="ul-row">
-    <div>
-      <div class="ul-label">Step 1 — Collection A</div>
-      <label id="zoneA" class="ul-zone" for="fileA" role="button" aria-label="Load CSV A">
-        <div class="ul-cta"><span class="ul-step">1</span> Load A CSV</div>
-        <div class="ul-sub"><b>Click anywhere</b> or <b>Drag &amp; drop</b> a file here</div>
-        <div id="metaA" class="ul-meta"><span class="footerhint">No file loaded</span></div>
-        <input id="fileA" type="file" accept=".csv,text/csv" class="ul-sr">
-      </label>
-    </div>
-    <div>
-      <div class="ul-label">Step 2 — Collection B</div>
-      <label id="zoneB" class="ul-zone" for="fileB" role="button" aria-label="Load CSV B">
-        <div class="ul-cta"><span class="ul-step">2</span> Load B CSV</div>
-        <div class="ul-sub"><b>Click anywhere</b> or <b>Drag &amp; drop</b> a file here</div>
-        <div id="metaB" class="ul-meta"><span class="footerhint">No file loaded</span></div>
-        <input id="fileB" type="file" accept=".csv,text/csv" class="ul-sr">
-      </label>
-    </div>
-  </div>
-  <div class="toolbar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
-    <button id="swapAB" class="export-btn" disabled>Swap A/B</button>
-    <button id="clearAB" class="export-btn" disabled>Clear</button>
-    <span class="footerhint" id="ul_status">Waiting for files…</span>
-  </div>
+<div class="helpbox" style="display:block;margin-bottom:10px">Load two CSV exports (A &amp; B). Data will feed Top 10 Styles and other components automatically.</div>
+<div class="ul-row">
+<div>
+<div class="ul-label">Step 1 — Collection A</div>
+<label aria-label="Load CSV A" class="ul-zone" for="fileA" id="zoneA" role="button">
+<div class="ul-cta"><span class="ul-step">1</span> Load A CSV</div>
+<div class="ul-sub"><b>Click anywhere</b> or <b>Drag &amp; drop</b> a file here</div>
+<div class="ul-meta" id="metaA"><span class="footerhint">No file loaded</span></div>
+<input accept=".csv,text/csv" class="ul-sr" id="fileA" type="file"/>
+</label>
+</div>
+<div>
+<div class="ul-label">Step 2 — Collection B</div>
+<label aria-label="Load CSV B" class="ul-zone" for="fileB" id="zoneB" role="button">
+<div class="ul-cta"><span class="ul-step">2</span> Load B CSV</div>
+<div class="ul-sub"><b>Click anywhere</b> or <b>Drag &amp; drop</b> a file here</div>
+<div class="ul-meta" id="metaB"><span class="footerhint">No file loaded</span></div>
+<input accept=".csv,text/csv" class="ul-sr" id="fileB" type="file"/>
+</label>
+</div>
+</div>
+<div class="toolbar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+<button class="export-btn" disabled="" id="swapAB">Swap A/B</button>
+<button class="export-btn" disabled="" id="clearAB">Clear</button>
+<span class="footerhint" id="ul_status">Waiting for files…</span>
+</div>
 </section>
-
-  <!-- === Overlap Explorer (new component) === -->
-<section id="overlap-explorer-card" class="card" style="margin-top:16px">
-  <overlap-explorer title="Overlap Explorer"></overlap-explorer>
+<!-- === Overlap Explorer (new component) === -->
+<section class="card" id="overlap-explorer-card" style="margin-top:16px">
+<overlap-explorer title="Overlap Explorer"></overlap-explorer>
 </section>
-
-
 <div class="card" style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-    <div style="font-weight:700">Styles</div>
-    <label style="display:inline-flex;gap:8px;align-items:center;color:#9aa4b2;font-size:13px">
-      <input id="optShowCounts" type="checkbox" checked> Show counts
+<div style="font-weight:700">Styles</div>
+<label style="display:inline-flex;gap:8px;align-items:center;color:#9aa4b2;font-size:13px">
+<input checked="" id="optShowCounts" type="checkbox"/> Show counts
     </label>
-    <label style="display:inline-flex;gap:8px;align-items:center;color:#9aa4b2;font-size:13px">
-      <input id="optShowPercent" type="checkbox" checked> Show percent
+<label style="display:inline-flex;gap:8px;align-items:center;color:#9aa4b2;font-size:13px">
+<input checked="" id="optShowPercent" type="checkbox"/> Show percent
     </label>
-  
 <script>
 // Wire "Show counts" checkbox to Store.setOptions
 (function(){
@@ -467,14 +456,12 @@
 })();
 </script>
 </div>
-<div class="row2 style="margin-top:12px">
-    <styles-top10 side="A" title="Top 10 Styles — A only"></styles-top10>
-    <styles-top10 side="B" title="Top 10 Styles — B only"></styles-top10>
-  </div>
-
+<div class="row2" style="margin-top:12px">
+<styles-top10 side="A" title="Top 10 Styles — A only"></styles-top10>
+<styles-top10 side="B" title="Top 10 Styles — B only"></styles-top10>
+</div>
 <div style="margin-top:18px">
 </div>
-
 <script>
 // --- Style Points helpers (robust fallback) ---
 (function(){
@@ -516,7 +503,6 @@
   }
 })();
 </script>
-
 <script>
 // v10g: robust help toggles + room guarantee
 (function(){
@@ -559,7 +545,6 @@
   }, true);
 })();
 </script>
-
 <script>
 // v10h: robust auto-wire for help buttons even if markup varies
 (function(){
@@ -662,7 +647,6 @@
   else { wire(); }
 })();
 </script>
-
 <script>
 // Discogs Unified Loader (embedded) — CSV-only, normalizes styles + common fields, broadcasts to window.Store + events.
 (function(){
@@ -755,7 +739,11 @@ function splitArtistsSmart(text){
       return rows.map(normalizeRow);
     }
     // Fallback csv
-    var lines=String(text||'').replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+    var lines=String(text||'').replace(/\r
+/g,'
+').replace(/\r/g,'
+').split('
+');
     if (!lines.length) return [];
     var header = splitLine(lines[0]), raw=[], i,j;
     for (i=1;i<lines.length;i++){
@@ -883,7 +871,6 @@ if (window.__waitStoreReady){
   });
 })();
 </script>
-
 <script>
 // Robust tally for StylesTop10: returns { rows:[{style,count}], total:Number }
 function tallyObject(rows){
@@ -1099,7 +1086,9 @@ this.shadowRoot.getElementById('toggle').textContent = 'Show all styles';
       const src = '"' + String(fname).replace(/"/g,'""') + '"';
       out.push([idx+1, style, r.count||0, pct.toFixed(1), src].join(','));
     });
-    const blob = new Blob([out.join('\n') + '\n'], {type:'text/csv;charset=utf-8'});
+    const blob = new Blob([out.join('
+') + '
+'], {type:'text/csv;charset=utf-8'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `styles_ranked_${(fname||'').replace(/[^\w.-]+/g,'_').slice(0,120)}.csv`;
     document.body.appendChild(a); a.click(); a.remove();
@@ -1243,7 +1232,6 @@ _drawCanvas(rows, total, w, h, title){
 function roundRect(ctx,x,y,w,h,r){ const rr=Math.min(r, h/2, w/2); ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath(); }
 if(!customElements.get('styles-top10')) if(!customElements.get('styles-top10')) if(!customElements.get('styles-top10')) customElements.define('styles-top10', StylesTop10);if(!customElements.get('styles-top10')) if(!customElements.get('styles-top10')) if(!customElements.get('styles-top10')) customElements.define('styles-top10', StylesTop10);
 </script>
-
 <script>
 // === Swap/Clear toolbar controller (minimal, self-contained) ===
 (function(){
@@ -1329,7 +1317,6 @@ try{ window.broadcast && window.broadcast(null, null); }catch(e){}
   }catch(e){ bind(); }
 })();
 </script>
-
 <script>
 // === Toolbar activator listening to discogs:* events (no Store needed) ===
 (function(){
@@ -1363,9 +1350,6 @@ try{ window.broadcast && window.broadcast(null, null); }catch(e){}
   try{ setMeta(); sync(); }catch(e){}
 })();
 </script>
-
-
-
 <script>
 // --- Top10 compatibility shim: normalize rows & harden consume ---
 (function(){
@@ -1423,7 +1407,6 @@ try{ window.broadcast && window.broadcast(null, null); }catch(e){}
   });
 })();
 </script>
-
 <script>
 // -- Robust Swap A/B patch (uses Store if available, falls back to globals) --
 (function(){
@@ -1470,17 +1453,13 @@ try{ window.broadcast && window.broadcast(null, null); }catch(e){}
   else bind();
 })();
 </script>
-
-
-  <div class="card" style="margin-top:16px">
-    <div style="display:flex;align-items:center;justify-content:flex-start;gap:12px;margin:0 0 6px">
-      <button id="goGSM" class="btn" style="border-color:transparent;background:linear-gradient(180deg,#16a34a,#15803d);color:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;" disabled>What's the Grade?</button>
-      <span class="gsHint" style="opacity:.85;color:#cbd5e1;font-weight:600;">This is how well you match</span>
-    </div>
-    <groove-style-match></groove-style-match>
-  </div>
-
-
+<div class="card" style="margin-top:16px">
+<div style="display:flex;align-items:center;justify-content:flex-start;gap:12px;margin:0 0 6px">
+<button class="btn" disabled="" id="goGSM" style="border-color:transparent;background:linear-gradient(180deg,#16a34a,#15803d);color:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;">What's the Grade?</button>
+<span class="gsHint" style="opacity:.85;color:#cbd5e1;font-weight:600;">This is how well you match</span>
+</div>
+<groove-style-match></groove-style-match>
+</div>
 <script>
 (function(){
   // --- Tier definitions ---
@@ -1995,11 +1974,14 @@ update(){ this.stopAnimations(); this.refreshDisabled();
       if(!this._GI||!this._dataA||!this._dataB){ alert('No results to export yet.'); return; }
       const Aname=(this._dataA.name||'A'), Bname=(this._dataB.name||'B');
       const header=["Rank","Style","A_Count","B_Count","GrooveIndex_Label","GrooveIndex_Score","StylePoints_Label","StylePoints_Score","FileA","FileB","Match_Score"];
-      const esc=v=>{ v=v==null?'':String(v); return /[",\n]/.test(v) ? ('"'+v.replace(/"/g,'""')+'"') : v; };
+      const esc=v=>{ v=v==null?'':String(v); return /[",
+]/.test(v) ? ('"'+v.replace(/"/g,'""')+'"') : v; };
       const giName=giTier(this._GI.GI_display).name; const spKey=spTier(this._GI.SP).key;
       const lines=[header.join(',')];
       (this._matched||[]).forEach((r,i)=>{ lines.push([i+1,r.style,r.countA,r.countB,giName,this._GI.GI_display,spKey,this._GI.SP,Aname,Bname,(this._matchScore!=null?this._matchScore:'')].map(esc).join(',')); });
-      const csvBlob=new Blob([lines.join('\n')+'\n'], {type:'text/csv;charset=utf-8'});
+      const csvBlob=new Blob([lines.join('
+')+'
+'], {type:'text/csv;charset=utf-8'});
       const a=document.createElement('a'); a.href=URL.createObjectURL(csvBlob); a.download='matched_styles.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
     }
   }
@@ -2018,8 +2000,6 @@ setDis();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wireGSM, {once:true}); else wireGSM();
 })();
 </script>
-
-
 <script>
 // Overlap Explorer — Web Component
 (function(){
@@ -2666,7 +2646,9 @@ filter(q){
           ].join(',');
           out.push(row);
         });
-        const blob = new Blob([out.join('\n')+'\n'], {type:'text/csv;charset=utf-8'});
+        const blob = new Blob([out.join('
+')+'
+'], {type:'text/csv;charset=utf-8'});
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
         a.download = `overlap_${fname}.csv`; document.body.appendChild(a); a.click(); a.remove();
         setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
@@ -2676,7 +2658,9 @@ filter(q){
       if (header.length){
         const out = [header.join(',')];
         rows.forEach(a => out.push(csvEscape(a)));
-        const blob = new Blob([out.join('\n')+'\n'], {type:'text/csv;charset=utf-8'});
+        const blob = new Blob([out.join('
+')+'
+'], {type:'text/csv;charset=utf-8'});
         const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
         a.download = `overlap_${fname}.csv`; document.body.appendChild(a); a.click(); a.remove();
         setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
@@ -2688,8 +2672,6 @@ filter(q){
   customElements.define('overlap-explorer', OverlapExplorer);
 })();
 </script>
-
-
 <script>
 (function(){
   function onClick(e){
@@ -2707,8 +2689,6 @@ filter(q){
   document.addEventListener('click', onClick, true);
 })();
 </script>
-
-
 <script>
 /* ==== OE FULL TAKEOVER v8 ==== */
 /* Renders all six lists from normalized stats; prevents legacy handlers from blanking;
@@ -3057,7 +3037,6 @@ filter(q){
   } else { onReady(); }
 })();
 </script>
-
 <script>
 /* ==== OE FULL TAKEOVER v9 ==== */
 /* Fixes:
@@ -3414,7 +3393,6 @@ filter(q){
   } else { onReady(); }
 })();
 </script>
-
 <script>
 /* ==== OE FULL TAKEOVER v10 ==== */
 /* Fixes:
@@ -3805,7 +3783,6 @@ filter(q){
   } else { onReady(); }
 })();
 </script>
-
 <style id="oe-v11-chev-style">
 /* Fallback chevron direction if legacy CSS misses aria-expanded or button class.
    Rotate the first svg/icon inside the header button when collapsed. */
@@ -4210,7 +4187,6 @@ filter(q){
   } else { onReady(); }
 })();
 </script>
-
 <!-- Injected: Artist ID map fixer for Discogs API CSV -->
 <script>
 (function(){
@@ -4274,7 +4250,6 @@ filter(q){
   else run();
 })();
 </script>
-
 <!-- Injected: unify link colors for artists & releases -->
 <script>
 (function(){
@@ -4330,7 +4305,6 @@ filter(q){
   else { inject(); }
 })();
 </script>
-
 <!-- Injected: API-ready auto-reveal + dynamic link maps -->
 <script>
 (function(){
@@ -4550,8 +4524,6 @@ filter(q){
   else { run(); }
 })();
 </script>
-
-
 <!-- Injected: Native cancel + Firefox fallback for #find (with health check) -->
 <script>
 (function(){
@@ -4669,7 +4641,6 @@ filter(q){
   else mount();
 })();
 </script>
-
 <!-- Injected: Resilient mobile single-column (doc + shadow) with health log -->
 <script>
 (function(){
@@ -4727,497 +4698,19 @@ filter(q){
   window.addEventListener('resize', ensureShadowCSS);
 })();
 </script>
-
-<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">musicMatchManager vv2025.08.18.1846.stable6g_hotfix8</footer>
-
-
-
-
-
-
-
-
+<footer style="margin:22px 0 8px;color:#9aa4b2;font-size:12px;text-align:center;opacity:.8">v2025.08.18.1846.stable6g_hotfix5</footer>
 <!-- Injected: helpers vstable6f (exclude Various / ID 194; Excel exports; global intercept) -->
-<script>
-(function(){
-  try{ document.documentElement.setAttribute('data-build-version', 'v2025.08.18.0454.stable6f'); }catch(_){}
-
-  function host(){ return document.querySelector('overlap-explorer'); }
-  function root(){ var h=host(); return h && (h.shadowRoot || h); }
-  function nowISO(){ try{ return new Date().toISOString(); } catch(_){ return ''; } }
-  function buildVersion(){ try{ return document.documentElement.getAttribute('data-build-version') || 'v2025.08.18.0454.stable6f'; }catch(_){ return 'v2025.08.18.0454.stable6f'; } }
-  function getRows(side){
-    try{
-      var S = window.Store || {};
-      var src = (S.get && S.get(side)) || S[side] || S['_'+side] || null;
-      if (!src) return [];
-      if (Array.isArray(src)) return src;
-      if (Array.isArray(src.rows)) return src.rows;
-    }catch(_){}
-    return [];
-  }
-  function norm(s){
-    try { return String(s||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
-    catch(_){ return (s||'').toString().toLowerCase().trim(); }
-  }
-
-  // Exclusion rules — mirror panel behavior: skip "Various"/"Various Artists" and Discogs artist id 194
-  function isIgnorableArtist(name, id){
-    var n = norm(name);
-    if (n==='various' || n==='various artists') return true;
-    if (id!=null && id!==undefined){
-      var raw = String(id).trim();
-      var num = raw.split('-')[0]; // tolerate slug form like '194-Various'
-      if (num === '194') return true;
-    }
-    return false;
-  }
-
-  // -------- Artist extraction with Discogs API mapping --------
-  function splitArtistsString(s){
-    var parts = String(s||'').split(/\s*\/\s*|\s*&\s*|\s*,\s*/).map(function(x){ return x.trim(); }).filter(Boolean);
-    return parts.length ? parts : (s?[String(s)]:[]);
-  }
-  function splitIdsString(s){
-    var parts = String(s||'').split(/\s*;\s*/).map(function(x){ return x.trim(); }).filter(Boolean);
-    return parts;
-  }
-  function extractArtists(row){
-    var out = [];
-    // a) Discogs API columns
-    var namesStr = row && (row.artist_names || row['artist_names']);
-    var idsStr   = row && (row.artist_ids || row['artist_ids']);
-    if (namesStr){
-      var names = Array.isArray(namesStr) ? namesStr : splitArtistsString(namesStr);
-      var ids = Array.isArray(idsStr) ? idsStr : splitIdsString(idsStr);
-      names.forEach(function(name, idx){
-        var id = (ids && ids[idx]) ? ids[idx] : (ids && ids.length===1 ? ids[0] : null);
-        if (!isIgnorableArtist(name, id)) out.push({ name: String(name), id: id });
-      });
-    }
-
-    // b) v2 nested
-    var disp = (row && row.artist && row.artist.display) || null;
-    var aidLoose  = (row && (row.artist_id || row['Artist ID'] || row.artistId || row.artistid || row['artist_id'])) || null;
-    if (disp && !isIgnorableArtist(disp, aidLoose) && !out.some(x=>norm(x.name)===norm(disp))) out.push({ name: String(disp), id: aidLoose });
-
-    // c) legacy 'Artists' / 'Artist'
-    var legacyStr = (!namesStr && row && (row['Artists'] || row['Artist'])) ? row['Artists']||row['Artist'] : null;
-    if (legacyStr){
-      splitArtistsString(legacyStr).forEach(function(nm){
-        if (!isIgnorableArtist(nm, aidLoose) && !out.some(x=>norm(x.name)===norm(nm))) out.push({ name: nm, id: aidLoose });
-      });
-    }
-    return out;
-  }
-
-  function buildArtistCountMap(side){
-    var map = new Map();
-    getRows(side).forEach(function(r){
-      extractArtists(r).forEach(function(ai){
-        if(!ai || !ai.name) return;
-        var k = norm(ai.name);
-        var v = map.get(k) || { name: ai.name, id: ai.id||null, count: 0 };
-        v.count += 1;
-        if (!v.id && ai.id) v.id = ai.id;
-        if (ai.name && (!v.name || ai.name.length > v.name.length)) v.name = ai.name;
-        map.set(k, v);
-      });
-    });
-    return map;
-  }
-
-  // iOS overlay scrollbars (unchanged)
-  function attachScrollbars(){
-    var ua = navigator.userAgent || '';
-    var isIOSWK = /AppleWebKit/.test(ua) && /Mobile\/|iP(hone|ad|od)/.test(ua);
-    if (!isIOSWK) return;
-    var r=root(); if(!r) return;
-    if (!r.getElementById('osb-final-styles')){
-      var st=document.createElement('style'); st.id='osb-final-styles';
-      st.textContent='.osbF-track,.osbF-thumb{position:absolute;left:-6px;pointer-events:none;z-index:9999;border-radius:3px}.osbF-track{width:6px;background:rgba(255,255,255,.28);opacity:.9}.osbF-thumb{width:4px;background:var(--text,#f4f6fa);opacity:.9}.osbF-hide .osbF-thumb{opacity:.35}@media (min-width:921px){.osbF-track,.osbF-thumb{display:none!important}}';
-      r.appendChild(st);
-    }
-    function containerFor(el){ var n=el.parentElement; while(n&&n!==r){ if(getComputedStyle(n).position!=='static') return n; n=n.parentElement; } n=el.parentElement||el; if(getComputedStyle(n).position==='static') n.style.position='relative'; return n; }
-    function attachOne(el){
-      if(!el || el._osbF) return;
-      var c=containerFor(el), tr=document.createElement('div'), th=document.createElement('div');
-      tr.className='osbF-track'; th.className='osbF-thumb'; c.appendChild(tr); c.appendChild(th);
-      el._osbF={track:tr,thumb:th,container:c};
-      function layout(){ var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); var top=Math.max((er.top-cr.top)+4,0),h=Math.max(er.height-8,0); tr.style.top=top+'px'; tr.style.height=h+'px'; update(); }
-      function update(){ var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop; if(sh<=ch+1){ tr.style.display='none'; th.style.display='none'; return; } tr.style.display='block'; th.style.display='block'; var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect(); var viewH=Math.max(er.height-8,0); var ratio=ch/sh; var h=Math.max(24, Math.floor(viewH*ratio)); var top=Math.floor((st/(sh-ch))*(viewH-h)); th.style.top=(Math.max((er.top-cr.top)+4,0)+top)+'px'; th.style.height=h+'px'; }
-      function peek(){ c.classList.remove('osbF-hide'); update(); clearTimeout(el._osbFto); el._osbFto=setTimeout(function(){ c.classList.add('osbF-hide'); }, 900); }
-      el.addEventListener('scroll', peek, {passive:true}); el.addEventListener('touchstart', peek, {passive:true}); window.addEventListener('resize', layout);
-      new ResizeObserver(function(){ layout(); }).observe(el);
-      layout(); peek();
-    }
-    ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases'].forEach(function(id){ var el=root().getElementById(id); if(el) attachOne(el); });
-  }
-
-  // Per-artist row badges (Only lists)
-  function applyPerArtistBadges(){
-    var r=root(); if(!r) return;
-    var A=r.getElementById('listAOnlyArtists');
-    var B=r.getElementById('listBOnlyArtists');
-    var mapA = buildArtistCountMap('A');
-    var mapB = buildArtistCountMap('B');
-    function setBadges(listEl, map){
-      if(!listEl) return;
-      [].slice.call(listEl.querySelectorAll('.row-pill')).forEach(function(n){ n.remove(); });
-      var rows = [].slice.call(listEl.children);
-      rows.forEach(function(row){
-        var nameEl = row.querySelector('a, .name, .label, span, div');
-        var label = nameEl ? (nameEl.textContent||'').trim() : (row.textContent||'').trim();
-        if(!label) return;
-        var k = norm(label);
-        var v = map.get(k);
-        if(!v || !v.count) return;
-        var pill = document.createElement('span');
-        pill.className = 'pill row-pill';
-        pill.textContent = String(v.count);
-        pill.style.cssText='margin-left:8px; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,.1); background:#1b233a; color:#cbd5e1; font-size:11px; white-space:nowrap;';
-        if(nameEl && nameEl.parentNode){
-          nameEl.parentNode.insertBefore(pill, nameEl.nextSibling);
-        } else {
-          row.appendChild(pill);
-        }
-      });
-    }
-    setBadges(A, mapA);
-    setBadges(B, mapB);
-  }
-
-  // ---- Excel-friendly export helpers (stable6d foundation) ----
-  function pickSepFromEvent(e){
-    if (e && e.altKey) return {sep:'\t', ext:'tsv'};
-    if (e && e.shiftKey) return {sep:';', ext:'csv'};
-    try{ var dec = (Intl.NumberFormat && Intl.NumberFormat().format(1.1)) || '1.1';
-         if (dec.indexOf(',')>=0) return {sep:';', ext:'csv'}; }catch(_){}
-    return {sep:',', ext:'csv'};
-  }
-  function csvEscapeWithSep(v, sep){
-    if (v==null) return '';
-    var s=String(v);
-    var needQuote = s.indexOf('"')>=0 || s.indexOf('\n')>=0 || s.indexOf('\r')>=0 || s.indexOf(sep)>=0;
-    if (needQuote) s='"'+s.replace(/"/g,'""')+'"';
-    return s;
-  }
-  function toSeparated(rows, header, sep){
-    var CRLF = '\r\n';
-    var lines=[header.map(function(h){return csvEscapeWithSep(h, sep);}).join(sep)];
-    rows.forEach(function(r){
-      lines.push(r.map(function(c){ return csvEscapeWithSep(c, sep); }).join(sep));
-    });
-    return '\ufeff' + lines.join(CRLF);
-  }
-  function downloadSeparated(nameBase, rows, header, e){
-    var metaVer = buildVersion(), when = nowISO();
-    var sepInfo = pickSepFromEvent(e);
-    var sep = sepInfo.sep, ext = sepInfo.ext;
-    var hdr = header.concat(['build_version','generated_at','binding_source']);
-    var out = rows.map(function(r){ return r.concat([metaVer, when, 'enhanced_stable6f']); });
-    var content = toSeparated(out, hdr, sep);
-    var blob = new Blob([content], {type: (ext==='tsv'?'text/tab-separated-values':'text/csv')+';charset=utf-8;'});
-    var url = URL.createObjectURL(blob);
-    var a=document.createElement('a'); a.href=url; a.download=nameBase+'.'+ext; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  }
-
-  // Data builders using filtered maps
-  function buildCountsAB(){ return { a: buildArtistCountMap('A'), b: buildArtistCountMap('B') }; }
-  function rowsSharedArtists(){
-    var AB=buildCountsAB(), a=AB.a, b=AB.b, rows=[];
-    a.forEach(function(va,key){ var vb=b.get(key); if(!vb) return;
-      var name=va.name||(vb&&vb.name)||key; var aid=va.id||(vb&&vb.id)||''; var aC=va.count||0, bC=vb?(vb.count||0):0;
-      rows.push([name, aC+bC, aid, (aid?('https://www.discogs.com/artist/'+aid):''), aC, bC]);
-    });
-    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); });
-    return rows;
-  }
-  function rowsOnlyArtists(side){
-    var AB=buildCountsAB(); var src=side==='A'?AB.a:AB.b; var other=side==='A'?AB.b:AB.a; var rows=[];
-    src.forEach(function(v,key){ if(other.has(key)) return; rows.push([v.name, v.count||0, v.id||'', (v.id?('https://www.discogs.com/artist/'+v.id):'')]); });
-    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); });
-    return rows;
-  }
-  function rowsSharedReleases(){
-    var setA=new Map(), setB=new Map();
-    getRows('A').forEach(function(r){ var rid=r&&(r.release_id||r['Release ID']); if(rid!=null && rid!=='') setA.set(String(rid), r); });
-    getRows('B').forEach(function(r){ var rid=r&&(r.release_id||r['Release ID']); if(rid!=null && rid!=='') setB.set(String(rid), r); });
-    var rows=[];
-    setA.forEach(function(row,rid){ if(!setB.has(rid)) return;
-      var artist=(row&&row._artists&&row._artists.length)?row._artists.join(' & '):(row&&row.artist&&row.artist.display)||(row&&(row.Artist||row['Artist'])||(row['artist_names']))||'';
-      var title=(row&&(row._title||row.title||row.Title))||'';
-      var cat=(row&&(row._catalog||row.catalog_no||row['Catalog#']||row['Cat#']))||'';
-      rows.push([artist, title, cat, rid, 'https://www.discogs.com/release/'+rid]); });
-    rows.sort(function(x,y){ return x[0].localeCompare(y[0]) || x[1].localeCompare(y[1]); });
-    return rows;
-  }
-
-  // Export functions
-  function doExportSharedArtists(e){
-    var hdr = ['artist','count','artist_id','artist_url','count_in_A','count_in_B'];
-    downloadSeparated('shared_artists', rowsSharedArtists(), hdr, e);
-  }
-  function doExportOnlyA(e){
-    var hdr = ['artist','count','artist_id','artist_url'];
-    downloadSeparated('only_a_artists', rowsOnlyArtists('A'), hdr, e);
-  }
-  function doExportOnlyB(e){
-    var hdr = ['artist','count','artist_id','artist_url'];
-    downloadSeparated('only_b_artists', rowsOnlyArtists('B'), hdr, e);
-  }
-  function doExportSharedReleases(e){
-    var hdr = ['artist','title','catno','release_id','release_url'];
-    downloadSeparated('shared_releases', rowsSharedReleases(), hdr, e);
-  }
-
-  // Global export interception
-  var EXPORT_IDS = new Set(['exBothA','exA','exB','exBothR','exRelBoth']);
-  function globalIntercept(e){
-    try{
-      var path = e.composedPath ? e.composedPath() : (function(n){ var a=[]; while(n){ a.push(n); n=n.parentNode||n.host; } return a; })(e.target);
-      var targetBtn = null;
-      for (var i=0; i<path.length; i++){
-        var el = path[i];
-        if (!el || el===window || el===document) continue;
-        var id = el.id || '';
-        var tag = (el.tagName||'').toLowerCase();
-        var txt = (el.textContent||'').trim().toLowerCase();
-        if (EXPORT_IDS.has(id) || (tag==='button' && (/export shared artists/.test(txt) || /export a only/.test(txt) || /export b only/.test(txt) || /export shared releases/.test(txt)))){
-          targetBtn = el; break;
-        }
-      }
-      if (!targetBtn) return;
-      e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-      var id = targetBtn.id || '';
-      var txt = (targetBtn.textContent||'').trim().toLowerCase();
-      if (id==='exBothA' || /export shared artists/.test(txt)) return doExportSharedArtists(e);
-      if (id==='exA' || /export a only/.test(txt)) return doExportOnlyA(e);
-      if (id==='exB' || /export b only/.test(txt)) return doExportOnlyB(e);
-      if (id==='exBothR' || id==='exRelBoth' || /export shared releases/.test(txt)) return doExportSharedReleases(e);
-    }catch(err){ console.warn('[export intercept] failed', err); }
-  }
-  function bindGlobalInterceptor(){
-    if (bindGlobalInterceptor._bound) return;
-    document.addEventListener('click', globalIntercept, true);
-    bindGlobalInterceptor._bound = true;
-  }
-
-  function attachOnceWhenData(){
-    if (attachOnceWhenData._done) return;
-    var tries=0;
-    (function poll(){
-      var a=getRows('A').length, b=getRows('B').length;
-      if (a+b>0){
-        try{ attachScrollbars(); }catch(_){}
-        try{ applyPerArtistBadges(); }catch(_){}
-        bindGlobalInterceptor();
-        attachOnceWhenData._done = true;
-        return;
-      }
-      if (++tries>240) { bindGlobalInterceptor(); return; }
-      setTimeout(poll,50);
-    })();
-  }
-  function debounced(fn, ms){ var t; return function(){ clearTimeout(t); t=setTimeout(fn, ms); }; }
-  var onChange = debounced(function(){ try{ applyPerArtistBadges(); }catch(_){} }, 200);
-
-  function init(){
-    attachOnceWhenData();
-    try{
-      var S = window.Store;
-      if (S && S.addEventListener){ S.addEventListener('change', onChange); }
-    }catch(_){}
-  }
-  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init, {once:true}); else init();
-})();
-</script>
-
 
 <!-- Injected helpers: v2025.08.18.1846.stable6g_hotfix4 (overlay scrollbars, hide native, find clear, single-meta export) -->
-<script>(function(){"use strict";
-  function host(){return document.querySelector('overlap-explorer');}
-  function root(){var h=host();return h&&(h.shadowRoot||h);}
-  function ensureRoot(){var r=root(); if(!r){console.warn("[hotfix4] no explorer root yet");} return r;}
-
-  /* ===== Overlay scrollbars (custom) + hide native ===== */
-  function ensureSBStyles(){
-    var r=ensureRoot(); if(!r) return;
-    if(!r.getElementById('osb-styles')){
-      var st=document.createElement('style'); st.id='osb-styles';
-      st.textContent = [
-        '#listSharedArtists, #listAOnlyArtists, #listBOnlyArtists,',
-        '#listSharedReleases, #listAOnlyReleases, #listBOnlyReleases{',
-        '  scrollbar-width:none;-ms-overflow-style:none;}',
-        '#listSharedArtists::-webkit-scrollbar,#listAOnlyArtists::-webkit-scrollbar,',
-        '#listBOnlyArtists::-webkit-scrollbar,#listSharedReleases::-webkit-scrollbar,',
-        '#listAOnlyReleases::-webkit-scrollbar,#listBOnlyReleases::-webkit-scrollbar{',
-        '  width:0;height:0;display:none;}',
-        '.osb-track,.osb-thumb{position:absolute;left:-12px;pointer-events:none;z-index:2147483000;border-radius:6px}',
-        '.osb-track{width:10px;background:rgba(255,255,255,.18)}',
-        '.osb-thumb{width:8px;background:#e5e7eb;opacity:.95}',
-        '.osb-hide .osb-thumb{opacity:.55}',
-        '@media (min-width:921px){.osb-track,.osb-thumb{display:none!important}}'
-      ].join('');
-      r.appendChild(st);
-    }
-  }
-  function containerFor(el){
-    var n=el.parentElement, r=root();
-    while(n&&n!==r){ if(getComputedStyle(n).position!=='static') return n; n=n.parentElement; }
-    n=el.parentElement||el; if(getComputedStyle(n).position==='static') n.style.position='relative'; return n;
-  }
-  function attachSB(el){
-    if(!el||el._osb) return;
-    var c=containerFor(el), tr=document.createElement('div'), th=document.createElement('div');
-    tr.className='osb-track'; th.className='osb-thumb'; c.appendChild(tr); c.appendChild(th);
-    el._osb={track:tr,thumb:th,container:c};
-    function layout(){ var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect();
-      tr.style.top=Math.max(er.top-cr.top+4,0)+'px'; tr.style.height=Math.max(er.height-8,0)+'px'; update(); }
-    function update(){ var ch=el.clientHeight, sh=el.scrollHeight, st=el.scrollTop;
-      if(sh<=ch+1){ tr.style.display='none'; th.style.display='none'; return; }
-      tr.style.display='block'; th.style.display='block';
-      var cr=c.getBoundingClientRect(), er=el.getBoundingClientRect();
-      var viewH=Math.max(er.height-8,0), ratio=ch/sh, h=Math.max(26, Math.floor(viewH*ratio));
-      var top=Math.floor((st/(sh-ch))*(viewH-h));
-      th.style.top=(Math.max(er.top-cr.top+4,0)+top)+'px'; th.style.height=h+'px'; }
-    function peek(){ c.classList.remove('osb-hide'); update(); clearTimeout(el._osbTO); el._osbTO=setTimeout(function(){ c.classList.add('osb-hide'); }, 1000); }
-    el.addEventListener('scroll', peek, {passive:true}); el.addEventListener('touchstart', peek, {passive:true}); window.addEventListener('resize', layout);
-    new ResizeObserver(function(){ layout(); }).observe(el); layout(); peek();
-  }
-  function attachSBAll(){
-    ensureSBStyles(); var r=root(); if(!r) return;
-    ['listSharedArtists','listAOnlyArtists','listBOnlyArtists','listSharedReleases','listAOnlyReleases','listBOnlyReleases']
-      .forEach(function(id){ var el=r.getElementById(id); if(el) attachSB(el); });
-  }
-  function watchSB(){ var r=root(); if(!r) return; new MutationObserver(attachSBAll).observe(r,{childList:true,subtree:true}); }
-
-  /* ===== Find clear (×) ===== */
-  function ensureFindClear(){
-    var r=root(); if(!r) return; var inp=r.getElementById('find'); if(!inp) return;
-    var parent=inp.parentElement||r; if(getComputedStyle(parent).position==='static') parent.style.position='relative';
-    var btn=r.getElementById('findClearBtn');
-    if(!btn){ btn=document.createElement('button'); btn.id='findClearBtn'; btn.type='button'; btn.textContent='×';
-      btn.setAttribute('aria-label','Clear search'); btn.title='Clear';
-      btn.style.cssText='position:absolute; right:10px; top:50%; transform:translateY(-50%); width:18px; height:18px; line-height:18px; border-radius:999px; border:1px solid rgba(255,255,255,.18); background:#9aa4b2; color:#0b1020; font-weight:800; font-size:12px; display:none; z-index:2;';
-      parent.appendChild(btn);
-      btn.addEventListener('click', function(e){ e.preventDefault(); inp.value=''; inp.dispatchEvent(new Event('input',{bubbles:true})); inp.focus(); btn.style.display='none'; });
-      inp.addEventListener('input', function(){ btn.style.display = inp.value ? 'inline-block' : 'none'; });
-      btn.style.display = inp.value ? 'inline-block' : 'none'; }
-  }
-  function watchFind(){ var r=root(); if(!r) return; new MutationObserver(ensureFindClear).observe(r,{childList:true,subtree:true}); ensureFindClear(); }
-
-  /* ===== Export helpers (only build_version) ===== */
-  function csvEscape(v, sep){ if(v==null) return ''; var s=String(v); var need=s.includes('"')||s.includes('\n')||s.includes('\r')||s.includes(sep); return need?('"'+s.replace(/"/g,'""')+'"'):s; }
-  function pickSep(e){ if(e&&e.altKey) return {sep:'\t',ext:'tsv'}; if(e&&e.shiftKey) return {sep:';',ext:'csv'};
-    try{ var dec=(Intl.NumberFormat&&Intl.NumberFormat().format(1.1))||'1.1'; if(dec.indexOf(',')>=0) return {sep:';',ext:'csv'}; }catch(_){}
-    return {sep:',',ext:'csv'}; }
-  function toSeparated(rows, headers, sep){ var lines=[headers.map(function(h){return csvEscape(h,sep);}).join(sep)]; rows.forEach(function(r){ lines.push((r||[]).map(function(c){return csvEscape(c,sep);}).join(sep)); }); return '\ufeff'+lines.join('\r\n'); }
-  function exportFile(name, rows, headers, e){ var ver="v2025.08.18.1846.stable6g_hotfix4", info=pickSep(e), sep=info.sep, ext=info.ext;
-    var outRows=rows.map(function(r){ return (r||[]).concat([ver]); });
-    var outHdr=headers.concat(['build_version']);
-    var blob=new Blob([toSeparated(outRows,outHdr,sep)],{type:(ext==='tsv'?'text/tab-separated-values':'text/csv')+';charset=utf-8;'});
-    var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=name+'.'+ext; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  }
-  function norm(s){ try{return String(s||'').toLowerCase().normalize('NFKD').replace(/[^\w\s-]+/g,'').replace(/\s+/g,' ').trim();}catch(_){return String(s||'').toLowerCase().trim();} }
-  function buildArtistMap(side){ var S=window.Store||{}; var src=(S.get&&S.get(side))||S[side]||S['_'+side]||null;
-    var rows=Array.isArray(src)?src:((src&&Array.isArray(src.rows))?src.rows:[]);
-    var m=new Map(); rows.forEach(function(r){
-      var names=r&&(r.artist_names||r['artist_names']||r._artists||r['Artists']||r['Artist']||''); var ids=r&&(r.artist_ids||r['artist_ids']||'');
-      var ns=Array.isArray(names)?names:String(names||'').split(/\s*\/\s*|\s*&\s*|\s*,\s*/).map(function(x){return x.trim();}).filter(Boolean);
-      var is=Array.isArray(ids)?ids:String(ids||'').split(/\s*;\s*/).map(function(x){return x.trim();}).filter(Boolean);
-      ns.forEach(function(nm,i){ var id=is[i]||(is.length===1?is[0]:''); var key=norm(nm); if(key==='various'||key==='various artists'||id==='194') return; var v=m.get(key)||{name:nm,id:id,count:0}; v.count++; if(!v.id&&id) v.id=id; if(nm.length>(v.name||'').length) v.name=nm; m.set(key,v); });
-    }); return m; }
-  function rowsSharedArtists(){ var a=buildArtistMap('A'), b=buildArtistMap('B'), rows=[]; a.forEach(function(va,k){ var vb=b.get(k); if(!vb) return; var aid=va.id||vb.id||''; rows.push([va.name||vb.name,(va.count||0)+(vb.count||0),aid,(aid?('https://www.discogs.com/artist/'+aid):''),va.count||0,vb.count||0]); });
-    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); }); return rows; }
-  function rowsOnly(side){ var src=buildArtistMap(side), other=buildArtistMap(side==='A'?'B':'A'), rows=[]; src.forEach(function(v,k){ if(other.has(k)) return; rows.push([v.name,v.count||0,v.id||'',(v.id?('https://www.discogs.com/artist/'+v.id):'')]); });
-    rows.sort(function(x,y){ return (y[1]-x[1]) || x[0].localeCompare(y[0]); }); return rows; }
-  function rowsSharedReleases(){ function rows(side){ var S=window.Store||{}; var src=(S.get&&S.get(side))||S[side]||S['_'+side]||null; return Array.isArray(src)?src:((src&&src.rows)||[]); }
-    var A=rows('A'), B=rows('B'); var setA=new Map(), setB=new Map();
-    A.forEach(function(r){ var rid=r&&(r.release_id||r['Release ID']); if(rid!=null&&rid!=='') setA.set(String(rid), r); });
-    B.forEach(function(r){ var rid=r&&(r.release_id||r['Release ID']); if(rid!=null&&rid!=='') setB.set(String(rid), r); });
-    var out=[]; setA.forEach(function(row,rid){ if(!setB.has(rid)) return;
-      var artist=(row&&row._artists&&row._artists.length)?row._artists.join(' & '):(row&&row.artist&&row.artist.display)||(row&&(row.Artist||row['Artist'])||(row['artist_names']))||'';
-      var title=(row&&(row._title||row.title||row.Title))||''; var cat=(row&&(row._catalog||row.catalog_no||row['Catalog#']||row['Cat#']))||'';
-      out.push([artist,title,cat,rid,'https://www.discogs.com/release/'+rid]); });
-    out.sort(function(x,y){ return x[0].localeCompare(y[0]) || x[1].localeCompare(y[1]); }); return out; }
-
-  function interceptExports(){
-    var r=root(); if(!r) return;
-    r.addEventListener('click', function(e){
-      var btn = e.target.closest && e.target.closest('button, a, [role="button"]');
-      if (!btn || !r.contains(btn)) return;
-      var id = btn.id||''; var txt=(btn.textContent||'').trim().toLowerCase();
-      var isSharedA = id==='exBothA' || /export\s+shared\s+artists/.test(txt);
-      var isOnlyA   = id==='exA'     || /export\s+a\s+only/.test(txt);
-      var isOnlyB   = id==='exB'     || /export\s+b\s+only/.test(txt);
-      var isRelBoth = id==='exRelBoth' || id==='exBothR' || /export\s+shared\s+releases/.test(txt);
-      if (!(isSharedA||isOnlyA||isOnlyB||isRelBoth)) return;
-      e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-      if (isSharedA) return exportFile('shared_artists', rowsSharedArtists(), ['artist','count','artist_id','artist_url','count_in_A','count_in_B'], e);
-      if (isOnlyA)   return exportFile('only_a_artists', rowsOnly('A'), ['artist','count','artist_id','artist_url'], e);
-      if (isOnlyB)   return exportFile('only_b_artists', rowsOnly('B'), ['artist','count','artist_id','artist_url'], e);
-      if (isRelBoth) return exportFile('shared_releases', rowsSharedReleases(), ['artist','title','catno','release_id','release_url'], e);
-    }, true);
-  }
-
-  function boot(){
-    try{ document.documentElement.setAttribute('data-build-version', "v2025.08.18.1846.stable6g_hotfix4"); }catch(_){}
-    attachSBAll(); watchSB(); watchFind(); interceptExports();
-  }
-  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true}); else boot();
-})();</script>
 
 
-<script id="disable-custom-scrollbars">
-(function(){
-  var tries = 0;
-  function applyReset(r){
-    ['osb-styles','osb-final-styles'].forEach(function(id){
-      var el = r.getElementById(id); if(el && el.parentNode) el.parentNode.removeChild(el);
-    });
-    Array.from(r.querySelectorAll('.osb-track,.osb-thumb,.osbF-track,.osbF-thumb')).forEach(function(n){
-      if(n && n.parentNode) n.parentNode.removeChild(n);
-    });
-    var st = r.getElementById('native-scrollbars-reset');
-    if(!st){ st = document.createElement('style'); st.id='native-scrollbars-reset'; }
-    st.textContent = [
-      '#listSharedArtists,#listAOnlyArtists,#listBOnlyArtists,',
-      '#listSharedReleases,#listAOnlyReleases,#listBOnlyReleases{',
-      '  overflow-y:auto !important;',
-      '  scrollbar-width:auto !important;',
-      '  -ms-overflow-style:auto !important;',
-      '  -webkit-overflow-scrolling:touch !important;',
-      '}',
-      '#listSharedArtists::-webkit-scrollbar,#listAOnlyArtists::-webkit-scrollbar,',
-      '#listBOnlyArtists::-webkit-scrollbar,#listSharedReleases::-webkit-scrollbar,',
-      '#listAOnlyReleases::-webkit-scrollbar,#listBOnlyReleases::-webkit-scrollbar{',
-      '  width:12px !important; height:12px !important; display:block !important;',
-      '}'
-    ].join('\n');
-    if(st.parentNode !== r){ r.appendChild(st); } else { r.appendChild(st); }
-  }
-  function run(){
-    var host = document.querySelector('overlap-explorer');
-    var r = host && (host.shadowRoot || host);
-    if(!r){ if(++tries < 200){ return setTimeout(run, 50); } else { return; } }
-    applyReset(r);
-    var obs = new MutationObserver(function(muts){
-      var changed=false;
-      muts.forEach(function(m){
-        m.addedNodes && Array.from(m.addedNodes).forEach(function(n){
-          if(n.nodeType===1 && (
-             n.id==='osb-styles' || n.id==='osb-final-styles' ||
-             n.classList.contains('osb-track') || n.classList.contains('osb-thumb') ||
-             n.classList.contains('osbF-track') || n.classList.contains('osbF-thumb')
-          )){ if(n.parentNode) n.parentNode.removeChild(n); changed=true; }
-        });
-      });
-      if(changed) applyReset(r);
-    });
-    obs.observe(r,{childList:true,subtree:true});
-  }
-  run();
-})();
-</script>
-</body></html>
+</body></meta></html><style id="native-scrollbars">
+/* Native scrollbars for collection lists */
+#listSharedArtists, #listSharedReleases,
+#listAOnlyArtists, #listBOnlyArtists,
+#listAOnlyReleases, #listBOnlyReleases {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch; /* smooth momentum on iOS */
+}
+</style>
